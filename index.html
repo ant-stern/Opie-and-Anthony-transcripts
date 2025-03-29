@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opie and Anthony Transcripts Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #searchBar {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+        }
+        #results {
+            list-style-type: none;
+            padding: 0;
+        }
+        #results li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #results li a {
+            text-decoration: none;
+            color: #0066cc;
+        }
+        #results li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <!-- Fuse.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+</head>
+<body>
+    <h1>Opie and Anthony Transcripts Search</h1>
+    <input type="text" id="searchBar" placeholder="Search transcripts..." onkeyup="search()">
+    
+    <ul id="results"></ul>
+
+    <script>
+        let fuse; // Declare a variable to hold the Fuse.js instance
+        let data = [];
+
+        // Fetch the index.json file
+        fetch('index.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                data = jsonData; // Store the fetched data
+                // Set up Fuse.js with options
+                fuse = new Fuse(data, {
+                    keys: ['content'], // Search within the 'content' field of the JSON
+                    threshold: 0.3 // Adjust the threshold for search accuracy
+                });
+            })
+            .catch(error => {
+                console.error('Error loading index.json:', error);
+            });
+
+        // Function to perform search
+        function search() {
+            const query = document.getElementById('searchBar').value;
+            const results = fuse.search(query); // Search using Fuse.js
+
+            // Get the results container
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = ''; // Clear previous results
+
+            if (query === '') {
+                return; // No query entered, so we return early
+            }
+
+            // Display search results
+            results.forEach(result => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${result.item.filename}`; // Link to the corresponding file (you can adjust this to use the real URL)
+                link.textContent = `Match in ${result.item.filename}`; // Display the filename
+                listItem.appendChild(link);
+                resultsContainer.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>
