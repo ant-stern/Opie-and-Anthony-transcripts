@@ -47,7 +47,7 @@
         let data = [];
 
         // Fetch the index.json file
-        fetch('index.json')
+        fetch('https://raw.githubusercontent.com/ant-stern/Opie-and-Anthony-transcripts/main/index.json'
             .then(response => response.json())
             .then(jsonData => {
                 data = jsonData; // Store the fetched data
