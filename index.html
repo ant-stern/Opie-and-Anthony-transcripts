@@ -47,14 +47,19 @@
         let data = [];
 
         // Fetch the index.json file
-        fetch('https://raw.githubusercontent.com/ant-stern/Opie-and-Anthony-transcripts/main/index.json'
-            .then(response => response.json())
+        fetch('https://raw.githubusercontent.com/ant-stern/Opie-and-Anthony-transcripts/main/index.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(jsonData => {
-                data = jsonData; // Store the fetched data
-                // Set up Fuse.js with options
+                console.log("JSON Loaded:", jsonData); // Debugging
+                data = jsonData;
                 fuse = new Fuse(data, {
-                    keys: ['content'], // Search within the 'content' field of the JSON
-                    threshold: 0.3 // Adjust the threshold for search accuracy
+                    keys: ['content'],
+                    threshold: 0.3
                 });
             })
             .catch(error => {
