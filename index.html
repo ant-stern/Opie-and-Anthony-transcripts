@@ -6,11 +6,12 @@
     <title>Opie and Anthony Transcripts</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
-        .highlight { background-color: yellow; }
-        pre { white-space: pre-wrap; word-wrap: break-word; }
         #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
         #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
         #matchCounter { margin-left: 10px; }
+        pre { font-size: 18px; white-space: pre-wrap; word-wrap: break-word; }
+        .highlight { background-color: yellow; }
+        .current { background-color: orange !important; }
     </style>
 </head>
 <body>
@@ -200,6 +201,12 @@
         function scrollToMatch() {
             let highlighted = document.getElementsByClassName('highlight');
             if (highlighted.length > 0 && currentIndex >= 0) {
+                // Remove 'current' class from all matches
+                for (let match of highlighted) {
+                    match.classList.remove('current');
+                }
+                // Highlight the current match with orange
+                highlighted[currentIndex].classList.add('current');
                 highlighted[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
