@@ -6,20 +6,20 @@
     <title>Opie and Anthony Transcripts</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
-        #searchBox { width: 100%; padding: 10px; font-size: 16px; }
         .highlight { background-color: yellow; }
         pre { white-space: pre-wrap; word-wrap: break-word; }
-        #matchCounter { position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
-        #navButtons { margin-top: 5px; }
+        #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
+        #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
+        #matchCounter { margin-left: 10px; }
     </style>
 </head>
 <body>
     <h1>Opie and Anthony Transcripts</h1>
-    <input type="text" id="searchBox" placeholder="Search transcripts...">
-    <div id="matchCounter"><span id="currentMatch">0</span> / <span id="matchCount">0</span></div>
-    <div id="navButtons">
+    <div id="controls">
+        <input type="text" id="searchBox" placeholder="Search transcripts...">
         <button onclick="prevMatch()">⬆</button>
         <button onclick="nextMatch()">⬇</button>
+        <span id="matchCounter"><span id="currentMatch">0</span> / <span id="matchCount">0</span></span>
     </div>
     <pre id="transcript">
         <!-- Transcripts will go here -->
