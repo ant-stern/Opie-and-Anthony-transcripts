@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcripts</title>
+    <title>Opie and Anthony Transcripts</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; }
+        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
         #searchBox { width: 100%; padding: 10px; font-size: 16px; }
         .highlight { background-color: yellow; }
         pre { white-space: pre-wrap; word-wrap: break-word; }
+            #matchCounter { margin-top: 10px; font-size: 16px; }
+        #navButtons { margin-top: 5px; }
+        .highlight { background-color: yellow; }
     </style>
 </head>
 <body>
     <h1>Transcripts</h1>
     <input type="text" id="searchBox" placeholder="Search transcripts...">
+    <div id="matchCounter">Matches: <span id="matchCount">0</span> | Viewing: <span id="currentMatch">0</span></div>
+    <div id="navButtons">
+        <button onclick="prevMatch()">⬆</button>
+        <button onclick="nextMatch()">⬇</button>
+    </div>
     <pre id="transcript">
         <!-- Transcripts will go here -->
     </pre>
@@ -175,6 +183,56 @@
             
             document.getElementById('transcript').innerHTML = content;
         });
+            let matches = [];
+        let currentIndex = -1;
+        
+        function updateMatches() {
+            let search = document.getElementById('searchBox').value.toLowerCase();
+            let content = transcripts;
+            
+            if (search) {
+                let regex = new RegExp(search, 'gi');
+                matches = [];
+                content = transcripts.replace(regex, (match, offset) => {
+                    matches.push(offset);
+                    return `<span class='highlight'>${match}</span>`;
+                });
+                document.getElementById('matchCount').textContent = matches.length;
+                currentIndex = matches.length > 0 ? 0 : -1;
+            } else {
+                matches = [];
+                currentIndex = -1;
+                document.getElementById('matchCount').textContent = 0;
+            }
+            document.getElementById('currentMatch').textContent = currentIndex + 1;
+            document.getElementById('transcript').innerHTML = content;
+            if (matches.length > 0) scrollToMatch();
+        }
+        
+        function scrollToMatch() {
+            let highlighted = document.getElementsByClassName('highlight');
+            if (highlighted.length > 0 && currentIndex >= 0) {
+                highlighted[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function nextMatch() {
+            if (matches.length > 0) {
+                currentIndex = (currentIndex + 1) % matches.length;
+                document.getElementById('currentMatch').textContent = currentIndex + 1;
+                scrollToMatch();
+            }
+        }
+        
+        function prevMatch() {
+            if (matches.length > 0) {
+                currentIndex = (currentIndex - 1 + matches.length) % matches.length;
+                document.getElementById('currentMatch').textContent = currentIndex + 1;
+                scrollToMatch();
+            }
+        }
+        
+        document.getElementById('searchBox').addEventListener('input', updateMatches);
     </script>
 </body>
 </html>
