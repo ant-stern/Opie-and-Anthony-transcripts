@@ -28,6 +28,8 @@
 
         const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
 
+        console.log("Fetching: ", basePath + fileName); //added console.log
+
         fetch(basePath + fileName)
         .then(response => response.text())
         .then(htmlContent => {
