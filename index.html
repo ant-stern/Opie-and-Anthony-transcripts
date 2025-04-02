@@ -58,23 +58,25 @@
             resultsDiv.innerHTML = '';
             const query = document.getElementById('searchBox').value.toLowerCase();
 
+            // Sort results chronologically by extracting and comparing date parts
             results.sort((a, b) => {
-                const dateA = parseDate(a.ref);
-                const dateB = parseDate(b.ref);
-                return dateA - dateB;
-            });
+                const partsA = a.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                const partsB = b.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
 
-            function parseDate(fileName) {
-                const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
-                if (parts) {
-                    const dateString = `${parts[1]}-${parts[2]}-${parts[3]}`;
-                    const parsedDate = Date.parse(dateString);
-                    if (!isNaN(parsedDate)) {
-                        return parsedDate;
-                    }
+                if (partsA && partsB) {
+                    const yearA = parseInt(partsA[1]);
+                    const monthA = parseInt(partsA[2]);
+                    const dayA = parseInt(partsA[3]);
+                    const yearB = parseInt(partsB[1]);
+                    const monthB = parseInt(partsB[2]);
+                    const dayB = parseInt(partsB[3]);
+
+                    if (yearA !== yearB) return yearA - yearB;
+                    if (monthA !== monthB) return monthA - monthB;
+                    return dayA - dayB;
                 }
-                return 0;
-            }
+                return 0; // If parsing fails, treat them as equal
+            });
 
             results.forEach(result => {
                 const htmlFileName = result.ref;
