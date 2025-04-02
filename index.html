@@ -78,11 +78,16 @@
                         const resultDiv = document.createElement('div');
                         resultDiv.className = 'result';
                         let contextHtml = ''; // Accumulate context HTML
+                        let resultCount = 1; // Initialize result counter
 
                         indices.forEach(matchIndex => {
                             const start = Math.max(0, matchIndex - 200); // 200 characters before
                             const end = Math.min(textContent.length, matchIndex + query.length + 200); // 200 characters after
                             let context = textContent.substring(start, end);
+
+                            // Add ellipses if context is truncated
+                            if (start > 0) context = '... ' + context;
+                            if (end < textContent.length) context = context + ' ...';
 
                             // Highlight search term
                             const highlightStart = context.toLowerCase().indexOf(query);
@@ -92,7 +97,8 @@
                                     context.substring(highlightStart + query.length);
                             }
 
-                            contextHtml += `<p>${context}</p>`; // Add context to accumulated HTML
+                            contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`; // Add numbered result
+                            resultCount++;
                         });
 
                         resultDiv.innerHTML = `<h3>${htmlFileName}</h3>${contextHtml}`; // Display all context in one div
