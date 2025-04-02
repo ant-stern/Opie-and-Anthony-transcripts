@@ -33,8 +33,8 @@
             console.log('search_index.json parsed');
             const idx = lunr.Index.load(data);
             console.log('lunr index loaded');
-            document.getElementById('searchButton').addEventListener('click', performSearch); // Click event
-            document.getElementById('searchBox').addEventListener('keydown', function(event) { // Enter key event
+            document.getElementById('searchButton').addEventListener('click', performSearch);
+            document.getElementById('searchBox').addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     performSearch();
                 }
@@ -47,7 +47,6 @@
                 console.log('search results:', results);
                 displayResults(results);
             }
-
         })
         .catch(error => {
             console.error('Error fetching or parsing search_index.json:', error);
@@ -57,9 +56,8 @@
             console.log('displayResults called');
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
-            const query = document.getElementById('searchBox').value.toLowerCase(); // Get search query
+            const query = document.getElementById('searchBox').value.toLowerCase();
 
-            // Sort results chronologically by parsing date from file name
             results.sort((a, b) => {
                 const dateA = parseDate(a.ref);
                 const dateB = parseDate(b.ref);
@@ -69,14 +67,18 @@
             function parseDate(fileName) {
                 const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
                 if (parts) {
-                    return new Date(parts[1], parts[2] - 1, parts[3]); // Month is 0-indexed
+                    const dateString = `${parts[1]}-${parts[2]}-${parts[3]}`;
+                    const parsedDate = Date.parse(dateString);
+                    if (!isNaN(parsedDate)) {
+                        return parsedDate;
+                    }
                 }
-                return new Date(0); // Default to earliest date if parsing fails
+                return 0;
             }
 
             results.forEach(result => {
-                const htmlFileName = result.ref; // Get .html file name
-                fetch('html_transcripts/' + htmlFileName) // Fetch .html content
+                const htmlFileName = result.ref;
+                fetch('html_transcripts/' + htmlFileName)
                 .then(response => response.text())
                 .then(htmlContent => {
                     const tempDiv = document.createElement('div');
@@ -89,22 +91,20 @@
                         index = textContent.toLowerCase().indexOf(query, index + 1);
                     }
 
-                    if (indices.length > 0) { // Only create result div if there are matches
+                    if (indices.length > 0) {
                         const resultDiv = document.createElement('div');
                         resultDiv.className = 'result';
-                        let contextHtml = ''; // Accumulate context HTML
-                        let resultCount = 1; // Initialize result counter
+                        let contextHtml = '';
+                        let resultCount = 1;
 
                         indices.forEach(matchIndex => {
-                            const start = Math.max(0, matchIndex - 200); // 200 characters before
-                            const end = Math.min(textContent.length, matchIndex + query.length + 200); // 200 characters after
+                            const start = Math.max(0, matchIndex - 200);
+                            const end = Math.min(textContent.length, matchIndex + query.length + 200);
                             let context = textContent.substring(start, end);
 
-                            // Add ellipses if context is truncated
                             if (start > 0) context = '... ' + context;
                             if (end < textContent.length) context = context + ' ...';
 
-                            // Highlight search term
                             const highlightStart = context.toLowerCase().indexOf(query);
                             if (highlightStart !== -1) {
                                 context = context.substring(0, highlightStart) +
@@ -112,11 +112,11 @@
                                     context.substring(highlightStart + query.length);
                             }
 
-                            contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`; // Add numbered result
+                            contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`;
                             resultCount++;
                         });
 
-                        resultDiv.innerHTML = `<h3>${htmlFileName}</h3>${contextHtml}`; // Display all context in one div
+                        resultDiv.innerHTML = `<h3>${htmlFileName}</h3>${contextHtml}`;
                         resultsDiv.appendChild(resultDiv);
                     }
                 })
