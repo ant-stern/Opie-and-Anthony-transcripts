@@ -24,13 +24,13 @@
     <script src="lunr.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const fileName = encodeURIComponent(urlParams.get('file'));
+        const fileName = urlParams.get('file'); // Do not encode here
 
         const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
 
-        console.log("Fetching: ", basePath + fileName);
+        console.log("Fetching: ", basePath + encodeURIComponent(fileName)); // Encode only in fetch
 
-        fetch(basePath + fileName)
+        fetch(basePath + encodeURIComponent(fileName))
         .then(response => response.text())
         .then(htmlContent => {
             document.getElementById('transcriptContent').innerHTML = htmlContent;
