@@ -59,8 +59,20 @@
             resultsDiv.innerHTML = '';
             const query = document.getElementById('searchBox').value.toLowerCase(); // Get search query
 
-            // Sort results alphabetically (chronologically) by file name
-            results.sort((a, b) => a.ref.localeCompare(b.ref));
+            // Sort results chronologically by parsing date from file name
+            results.sort((a, b) => {
+                const dateA = parseDate(a.ref);
+                const dateB = parseDate(b.ref);
+                return dateA - dateB;
+            });
+
+            function parseDate(fileName) {
+                const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                if (parts) {
+                    return new Date(parts[1], parts[2] - 1, parts[3]); // Month is 0-indexed
+                }
+                return new Date(0); // Default to earliest date if parsing fails
+            }
 
             results.forEach(result => {
                 const htmlFileName = result.ref; // Get .html file name
