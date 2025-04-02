@@ -1,28 +1,40 @@
+HTML
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opie and Anthony Transcripts</title>
+    <title>Transcript</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
         #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
         #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
-        #results { margin-top: 20px; }
+        #transcriptContent { margin-top: 20px; word-wrap: break-word; }
         .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; word-wrap: break-word; }
         .highlight { background-color: orange; }
     </style>
 </head>
 <body>
-    <h1>Opie and Anthony Transcripts</h1>
+    <h1>Transcript</h1>
     <div id="controls">
         <input type="text" id="searchBox" placeholder="Search transcripts...">
         <button id="searchButton">Search</button>
     </div>
-    <div id="results"></div>
+    <div id="transcriptContent"></div>
 
     <script src="lunr.js"></script>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileName = urlParams.get('file');
+
+        fetch('html_transcripts/' + fileName)
+        .then(response => response.text())
+        .then(htmlContent => {
+            document.getElementById('transcriptContent').innerHTML = htmlContent;
+        });
+
+        // Add search functionality (similar to index.html)
         console.log('script started');
         fetch('search_index.json')
         .then(response => {
@@ -54,7 +66,7 @@
 
         function displayResults(results) {
             console.log('displayResults called');
-            const resultsDiv = document.getElementById('results');
+            const resultsDiv = document.getElementById('transcriptContent');
             resultsDiv.innerHTML = '';
             const query = document.getElementById('searchBox').value.toLowerCase();
 
@@ -117,9 +129,7 @@
                             resultCount++;
                         });
 
-                        // Create link to transcript page
-                        const link = `<a href="transcript.html?file=${htmlFileName}"><h3>${htmlFileName}</h3></a>`;
-                        resultDiv.innerHTML = `${link}${contextHtml}`;
+                        resultDiv.innerHTML = `<h3>${htmlFileName}</h3>${contextHtml}`;
                         resultsDiv.appendChild(resultDiv);
                     }
                 })
