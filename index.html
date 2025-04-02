@@ -9,7 +9,7 @@
         #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
         #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
         #results { margin-top: 20px; }
-        .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; word-wrap: break-word; } /* Added word-wrap */
+        .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; word-wrap: break-word; }
         .highlight { background-color: orange; }
     </style>
 </head>
@@ -17,7 +17,8 @@
     <h1>Opie and Anthony Transcripts</h1>
     <div id="controls">
         <input type="text" id="searchBox" placeholder="Search transcripts...">
-        <button id="searchButton">Search</button> </div>
+        <button id="searchButton">Search</button>
+    </div>
     <div id="results"></div>
 
     <script src="lunr.js"></script>
@@ -73,24 +74,30 @@
                         index = textContent.toLowerCase().indexOf(query, index + 1);
                     }
 
-                    indices.forEach(matchIndex => {
-                        const start = Math.max(0, matchIndex - 200); // 200 characters before
-                        const end = Math.min(textContent.length, matchIndex + query.length + 200); // 200 characters after
-                        let context = textContent.substring(start, end);
-
-                        // Highlight search term
-                        const highlightStart = context.toLowerCase().indexOf(query);
-                        if (highlightStart !== -1) {
-                            context = context.substring(0, highlightStart) +
-                                `<span class="highlight">${context.substring(highlightStart, highlightStart + query.length)}</span>` +
-                                context.substring(highlightStart + query.length);
-                        }
-
+                    if (indices.length > 0) { // Only create result div if there are matches
                         const resultDiv = document.createElement('div');
                         resultDiv.className = 'result';
-                        resultDiv.innerHTML = `<h3>${htmlFileName}</h3><p>${context}</p>`;
+                        let contextHtml = ''; // Accumulate context HTML
+
+                        indices.forEach(matchIndex => {
+                            const start = Math.max(0, matchIndex - 200); // 200 characters before
+                            const end = Math.min(textContent.length, matchIndex + query.length + 200); // 200 characters after
+                            let context = textContent.substring(start, end);
+
+                            // Highlight search term
+                            const highlightStart = context.toLowerCase().indexOf(query);
+                            if (highlightStart !== -1) {
+                                context = context.substring(0, highlightStart) +
+                                    `<span class="highlight">${context.substring(highlightStart, highlightStart + query.length)}</span>` +
+                                    context.substring(highlightStart + query.length);
+                            }
+
+                            contextHtml += `<p>${context}</p>`; // Add context to accumulated HTML
+                        });
+
+                        resultDiv.innerHTML = `<h3>${htmlFileName}</h3>${contextHtml}`; // Display all context in one div
                         resultsDiv.appendChild(resultDiv);
-                    });
+                    }
                 })
                 .catch(error => {
                     const resultDiv = document.createElement('div');
