@@ -24,11 +24,11 @@
     <script src="lunr.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const fileName = urlParams.get('file');
+        const fileName = encodeURIComponent(urlParams.get('file'));
 
         const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
 
-        console.log("Fetching: ", basePath + fileName); //added console.log
+        console.log("Fetching: ", basePath + fileName);
 
         fetch(basePath + fileName)
         .then(response => response.text())
@@ -93,7 +93,7 @@
 
             results.forEach(result => {
                 const htmlFileName = result.ref;
-                fetch(basePath + htmlFileName)
+                fetch(basePath + encodeURIComponent(htmlFileName))
                 .then(response => response.text())
                 .then(htmlContent => {
                     const tempDiv = document.createElement('div');
