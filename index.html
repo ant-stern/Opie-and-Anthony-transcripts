@@ -50,8 +50,18 @@
             results.forEach(result => {
                 const resultDiv = document.createElement('div');
                 resultDiv.className = 'result';
-                resultDiv.textContent = `File: ${result.ref}`;
-                resultsDiv.appendChild(resultDiv);
+                const htmlFileName = result.ref; // Get .html file name
+                fetch('html_transcripts/' + htmlFileName) // Fetch .html content
+                .then(response => response.text())
+                .then(htmlContent => {
+                    resultDiv.innerHTML = htmlContent; // Display HTML content
+                    resultsDiv.appendChild(resultDiv);
+                })
+                .catch(error => {
+                    resultDiv.textContent = `Error loading ${htmlFileName}`;
+                    resultsDiv.appendChild(resultDiv);
+                    console.error('Error loading HTML file:', error);
+                });
             });
         }
     </script>
