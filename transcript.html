@@ -1,5 +1,3 @@
-HTML
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +26,7 @@ HTML
         const urlParams = new URLSearchParams(window.location.search);
         const fileName = urlParams.get('file');
 
-        fetch('html_transcripts/' + fileName)
+        fetch('./html_transcripts/' + fileName) // Corrected fetch URL
         .then(response => response.text())
         .then(htmlContent => {
             document.getElementById('transcriptContent').innerHTML = htmlContent;
@@ -90,8 +88,8 @@ HTML
             });
 
             results.forEach(result => {
-                const htmlFileName = result.ref;
-                fetch('html_transcripts/' + htmlFileName)
+                const htmlFileName = a.ref;
+                fetch('./html_transcripts/' + htmlFileName) // Corrected fetch URL
                 .then(response => response.text())
                 .then(htmlContent => {
                     const tempDiv = document.createElement('div');
