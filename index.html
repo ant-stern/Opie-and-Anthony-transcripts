@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opie and Anthony Transcripts</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
+        #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
+        #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
+        #results { margin-top: 20px; }
+        .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Opie and Anthony Transcripts</h1>
+    <div id="controls">
+        <input type="text" id="searchBox" placeholder="Search transcripts...">
+    </div>
+    <div id="results"></div>
+
+    <script src="node_modules/lunr/lunr.js"></script>
+    <script>
+        fetch('search_index.json')
+        .then(response => response.json())
+        .then(data => {
+            const idx = lunr.Index.load(data);
+            document.getElementById('searchBox').addEventListener('input', function() {
+                const query = this.value;
+                const results = idx.search(query);
+                displayResults(results);
+            });
+        });
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result';
+                resultDiv.textContent = `File: ${result.ref}`;
+                resultsDiv.appendChild(resultDiv);
+            });
+        }
+
+    </script>
+</body>
+</html>
