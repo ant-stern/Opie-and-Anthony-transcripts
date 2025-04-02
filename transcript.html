@@ -16,7 +16,7 @@
 <body>
     <h1>Transcript</h1>
     <div id="controls">
-        <input type="text" id="searchBox" placeholder="Search transcripts...">
+        <input type="text" id="searchBox" placeholder="Search transcript...">
         <button id="searchButton">Search</button>
     </div>
     <div id="transcriptContent"></div>
@@ -26,7 +26,10 @@
         const urlParams = new URLSearchParams(window.location.search);
         const fileName = urlParams.get('file');
 
-        fetch('./html_transcripts/' + fileName) // Corrected fetch URL
+        // Replace with your actual GitHub username and repository name
+        const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
+
+        fetch(basePath + fileName) // Using absolute path for testing
         .then(response => response.text())
         .then(htmlContent => {
             document.getElementById('transcriptContent').innerHTML = htmlContent;
@@ -88,8 +91,8 @@
             });
 
             results.forEach(result => {
-                const htmlFileName = a.ref;
-                fetch('./html_transcripts/' + htmlFileName) // Corrected fetch URL
+                const htmlFileName = result.ref;
+                fetch(basePath + htmlFileName) // Using absolute path for testing
                 .then(response => response.text())
                 .then(htmlContent => {
                     const tempDiv = document.createElement('div');
