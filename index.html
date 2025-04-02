@@ -59,6 +59,9 @@
             resultsDiv.innerHTML = '';
             const query = document.getElementById('searchBox').value.toLowerCase(); // Get search query
 
+            // Sort results alphabetically (chronologically) by file name
+            results.sort((a, b) => a.ref.localeCompare(b.ref));
+
             results.forEach(result => {
                 const htmlFileName = result.ref; // Get .html file name
                 fetch('html_transcripts/' + htmlFileName) // Fetch .html content
