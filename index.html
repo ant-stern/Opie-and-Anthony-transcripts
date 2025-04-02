@@ -118,7 +118,7 @@
                         });
 
                         // Create link to transcript page
-                        const link = `<a href="transcript.html?file=${htmlFileName}"><h3>${htmlFileName}</h3></a>`;
+                        const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${htmlFileName}</h3></a>`;
                         resultDiv.innerHTML = `${link}${contextHtml}`;
                         resultsDiv.appendChild(resultDiv);
                     }
