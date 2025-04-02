@@ -10,6 +10,7 @@
         #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
         #results { margin-top: 20px; }
         .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; }
+        .highlight { background-color: orange; }
     </style>
 </head>
 <body>
@@ -47,17 +48,45 @@
             console.log('displayResults called');
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
+            const query = document.getElementById('searchBox').value.toLowerCase(); // Get search query
+
             results.forEach(result => {
-                const resultDiv = document.createElement('div');
-                resultDiv.className = 'result';
                 const htmlFileName = result.ref; // Get .html file name
                 fetch('html_transcripts/' + htmlFileName) // Fetch .html content
                 .then(response => response.text())
                 .then(htmlContent => {
-                    resultDiv.innerHTML = htmlContent; // Display HTML content
-                    resultsDiv.appendChild(resultDiv);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlContent;
+                    let textContent = tempDiv.textContent;
+                    const indices = [];
+                    let index = textContent.toLowerCase().indexOf(query);
+                    while (index !== -1) {
+                        indices.push(index);
+                        index = textContent.toLowerCase().indexOf(query, index + 1);
+                    }
+
+                    indices.forEach(matchIndex => {
+                        const start = Math.max(0, matchIndex - 200); // 200 characters before
+                        const end = Math.min(textContent.length, matchIndex + query.length + 200); // 200 characters after
+                        let context = textContent.substring(start, end);
+
+                        // Highlight search term
+                        const highlightStart = context.toLowerCase().indexOf(query);
+                        if (highlightStart !== -1) {
+                            context = context.substring(0, highlightStart) +
+                                `<span class="highlight">${context.substring(highlightStart, highlightStart + query.length)}</span>` +
+                                context.substring(highlightStart + query.length);
+                        }
+
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        resultDiv.innerHTML = `<h3>${htmlFileName}</h3><p>${context}</p>`;
+                        resultsDiv.appendChild(resultDiv);
+                    });
                 })
                 .catch(error => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
                     resultDiv.textContent = `Error loading ${htmlFileName}`;
                     resultsDiv.appendChild(resultDiv);
                     console.error('Error loading HTML file:', error);
