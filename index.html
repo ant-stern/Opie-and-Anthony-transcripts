@@ -34,6 +34,7 @@
             font-size: 16px;
             z-index: 1000;
             border-radius: 5px;
+            margin-top: 20px;
             margin-bottom: 10px;
             box-sizing: border-box;
             width: 95%;
@@ -88,13 +89,16 @@
             background-color: orange;
             color: black;
         }
-        a:link {
-            color: #FDD600; /* Unvisited links are yellow */
-            text-decoration: none; /* Optional: remove underline */
+        #results a:link {
+            color: #FDD600;
+            text-decoration: none;
         }
-        a:visited {
-            color: orange; /* Visited links are orange */
-            text-decoration: none; /* Optional: remove underline */
+        #results a:visited {
+            color: orange;
+            text-decoration: none;
+        }
+        #results p { /* Ensure snippet text is white */
+            color: white;
         }
     </style>
 </head>
