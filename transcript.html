@@ -27,7 +27,9 @@
         <span id="matchCount"></span>
         <button id="nextMatch" disabled>&darr;</button>
     </div>
-    <div id="transcriptContent"></div>
+    <div id="transcriptContent">
+        <div id="innerTranscript"></div>
+    </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -41,7 +43,7 @@
         fetch(basePath + encodeURIComponent(fileName))
         .then(response => response.text())
         .then(htmlContent => {
-            document.getElementById('transcriptContent').innerHTML = htmlContent;
+            document.getElementById('innerTranscript').innerHTML = htmlContent;
             setupInPageSearch();
         });
 
@@ -51,7 +53,7 @@
 
             function performSearch() {
                 const query = document.getElementById('searchBox').value.toLowerCase();
-                const content = document.getElementById('transcriptContent').innerHTML.toLowerCase();
+                const content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
                 matches = [];
                 currentMatch = -1;
 
@@ -80,14 +82,14 @@
             }
 
             function highlightMatches(query) {
-                const content = document.getElementById('transcriptContent').innerHTML;
+                const content = document.getElementById('innerTranscript').innerHTML;
                 let offset = 0;
 
                 matches.forEach(matchIndex => {
                     const highlightStart = matchIndex + offset;
                     const highlightEnd = highlightStart + query.length;
                     const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-                    document.getElementById('transcriptContent').innerHTML =
+                    document.getElementById('innerTranscript').innerHTML =
                         content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
                     offset += highlighted.length - query.length;
                 });
@@ -95,9 +97,13 @@
 
             function scrollToMatch() {
                 if (matches.length > 0 && currentMatch >= 0) {
-                    const highlighted = document.querySelectorAll('.highlight')[currentMatch];
-                    if (highlighted) {
-                        highlighted.scrollIntoView({ block: 'center' });
+                    try {
+                        const highlighted = document.querySelectorAll('.highlight')[currentMatch];
+                        if (highlighted) {
+                            highlighted.scrollIntoView({ block: 'center' });
+                        }
+                    } catch (error) {
+                        console.error('Error scrolling to match:', error);
                     }
                 }
             }
