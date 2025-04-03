@@ -5,9 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcript</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
-        #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
-        #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: black; /* Black background */
+            color: white; /* White text */
+        }
+        #controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border: 1px solid black;
+            font-size: 16px;
+            z-index: 1000;
+            color: black; /* Black text for controls */
+        }
+        #searchBox {
+            margin-right: 10px;
+            padding: 10px;
+            font-size: 16px;
+            color: black; /* Black text for input */
+        }
         #transcriptContent {
             margin-top: 20px;
             white-space: pre-wrap;
@@ -15,8 +38,16 @@
             overflow-wrap: break-word;
             width: 90%;
         }
-        .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; word-wrap: break-word; }
-        .highlight { background-color: orange; }
+        .result {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            word-wrap: break-word;
+        }
+        .highlight {
+            background-color: orange;
+            color: black; /* Black text for highlights */
+        }
     </style>
 </head>
 <body>
@@ -45,6 +76,8 @@
         .then(htmlContent => {
             // Replace <pre> tags
             htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/<\/pre>/g, '</div>');
+            // Replace newlines with <br>
+            htmlContent = htmlContent.replace(/\n/g, '<br>');
             document.getElementById('innerTranscript').innerHTML = htmlContent;
             setupInPageSearch();
         });
@@ -59,6 +92,9 @@
                 matches = [];
                 currentMatch = -1;
 
+                console.log('Search query:', query);
+                console.log('Content:', content);
+
                 // Remove previous highlights
                 document.querySelectorAll('.highlight').forEach(el => {
                     const parent = el.parentNode;
@@ -72,6 +108,8 @@
                         matches.push(index);
                         index = content.indexOf(query, index + 1);
                     }
+
+                    console.log('Matches:', matches);
 
                     if (matches.length > 0) {
                         highlightMatches(query);
@@ -116,9 +154,13 @@
                 document.getElementById('nextMatch').disabled = matches.length === 0 || currentMatch >= matches.length - 1;
             }
 
-            document.getElementById('searchButton').addEventListener('click', performSearch);
+            document.getElementById('searchButton').addEventListener('click', function() {
+                console.log('search button clicked');
+                performSearch();
+            });
             document.getElementById('searchBox').addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
+                    console.log('enter key pressed');
                     performSearch();
                 }
             });
