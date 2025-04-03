@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcript</title>
+    <title>Opie and Anthony Transcripts</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,10 +17,6 @@
             height: 250px;
             margin: 20px auto;
             display: block;
-        }
-        #episodeTitle {
-            text-align: center;
-            margin-bottom: 20px;
         }
         #controls {
             position: sticky;
@@ -40,6 +36,8 @@
             box-sizing: border-box;
             width: 95%;
             max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         #searchBox {
             margin-right: 10px;
@@ -64,114 +62,153 @@
         }
         #matchCount {
             margin: 0 10px;
+            box-sizing: border-box;
         }
-        .highlight {
-            background-color: yellow;
-            color: black;
-            font-weight: bold;
+
+        @media (max-width: 600px) {
+            #searchBox {
+                max-width: 200px;
+                padding: 6px;
+                font-size: 14px;
+                margin-right: 5px;
+            }
+            #searchButton, #prevMatch, #nextMatch {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+            #controls {
+                padding: 5px;
+                width: 95%;
+            }
         }
     </style>
 </head>
 <body>
     <img id="logo" src="OandAtranscripts.png" alt="Opie and Anthony Transcripts Logo">
-    <h1 id="episodeTitle"></h1>
     <div id="controls">
-        <input type="text" id="searchBox" placeholder="Search this transcript...">
+        <input type="text" id="searchBox" placeholder="Search transcripts...">
         <button id="searchButton">Search</button>
-        <button id="prevMatch" disabled>&uarr;</button>
-        <span id="matchCount"></span>
-        <button id="nextMatch" disabled>&darr;</button>
     </div>
-    <div id="transcriptContent">
-        <div id="innerTranscript"></div>
-    </div>
+    <div id="results"></div>
 
+    <script src="lunr.js"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const fileName = urlParams.get('file');
-
-        document.title = fileName.replace('.html', '');
-
-        const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
-
-        fetch(basePath + encodeURIComponent(fileName))
-        .then(response => response.text())
-        .then(htmlContent => {
-            htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/</pre>/g, '</div>').replace(/\n/g, '<br>');
-            document.getElementById('innerTranscript').innerHTML = htmlContent;
-            setupInPageSearch();
-        });
-
-        function formatEpisodeTitle(fileName) {
-            const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
-            if (parts) {
-                const date = new Date(parts[1], parts[2] - 1, parts[3]);
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            }
-            return fileName;
-        }
-
-        document.getElementById('episodeTitle').textContent = formatEpisodeTitle(fileName);
-
-        function setupInPageSearch() {
-            let matches = [];
-            let currentMatch = -1;
-
-            function removeHighlights() {
-                document.querySelectorAll('.highlight').forEach(el => {
-                    el.replaceWith(document.createTextNode(el.textContent));
-                });
-            }
+        fetch('search_index.json')
+        .then(response => response.json())
+        .then(data => {
+            const idx = lunr.Index.load(data);
+            document.getElementById('searchButton').addEventListener('click', performSearch);
+            document.getElementById('searchBox').addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
 
             function performSearch() {
-                removeHighlights();
+                const query = document.getElementById('searchBox').value;
+                const results = idx.search(query);
+                displayResults(results);
+            }
+
+            function displayResults(results) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
                 const query = document.getElementById('searchBox').value.toLowerCase();
-                const content = document.getElementById('innerTranscript');
-                const textNodes = [...content.childNodes].filter(node => node.nodeType === Node.TEXT_NODE);
-                matches = [];
-                currentMatch = -1;
+                const processedFiles = new Set();
 
-                textNodes.forEach(node => {
-                    let index = node.nodeValue.toLowerCase().indexOf(query);
-                    while (index !== -1) {
-                        matches.push({ node, index });
-                        index = node.nodeValue.toLowerCase().indexOf(query, index + 1);
+                results.sort((a, b) => {
+                    const partsA = a.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                    const partsB = b.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+
+                    if (partsA && partsB) {
+                        const yearA = parseInt(partsA[1]);
+                        const monthA = parseInt(partsA[2]);
+                        const dayA = parseInt(partsA[3]);
+                        const yearB = parseInt(partsB[1]);
+                        const monthB = parseInt(partsB[2]);
+                        const dayB = parseInt(partsB[3]);
+
+                        if (yearA !== yearB) return yearA - yearB;
+                        if (monthA !== monthB) return monthA - monthB;
+                        return dayA - dayB;
                     }
+                    return 0;
                 });
 
-                matches.forEach(({ node, index }) => {
-                    const matchText = node.splitText(index);
-                    matchText.splitText(query.length);
-                    const highlightSpan = document.createElement('span');
-                    highlightSpan.className = 'highlight';
-                    highlightSpan.textContent = matchText.nodeValue;
-                    matchText.replaceWith(highlightSpan);
+                results.forEach(result => {
+                    const htmlFileName = result.ref;
+                    if (processedFiles.has(htmlFileName)) {
+                        return;
+                    }
+                    processedFiles.add(htmlFileName);
+
+                    fetch('html_transcripts/' + htmlFileName)
+                    .then(response => response.text())
+                    .then(htmlContent => {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = htmlContent;
+                        let textContent = tempDiv.textContent;
+                        const indices = [];
+                        let index = textContent.toLowerCase().indexOf(query);
+                        while (index !== -1) {
+                            indices.push(index);
+                            index = textContent.toLowerCase().indexOf(query, index + 1);
+                        }
+
+                        if (indices.length > 0) {
+                            const resultDiv = document.createElement('div');
+                            resultDiv.className = 'result';
+                            let contextHtml = '';
+                            let resultCount = 1;
+
+                            const usedIndices = new Set();
+
+                            indices.forEach(matchIndex => {
+                                if (usedIndices.has(matchIndex)) {
+                                    return;
+                                }
+
+                                const start = Math.max(0, matchIndex - 200);
+                                const end = Math.min(textContent.length, matchIndex + query.length + 200);
+                                let context = textContent.substring(start, end);
+
+                                for (let i = start; i < end; i++) {
+                                    usedIndices.add(i);
+                                }
+
+                                if (start > 0) context = '... ' + context;
+                                if (end < textContent.length) context = context + ' ...';
+
+                                const highlightStart = context.toLowerCase().indexOf(query);
+                                if (highlightStart !== -1) {
+                                    context = context.substring(0, highlightStart) +
+                                        `<span class="highlight">${context.substring(highlightStart, highlightStart + query.length)}</span>` +
+                                        context.substring(highlightStart + query.length);
+                                }
+
+                                contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`;
+                                resultCount++;
+                            });
+
+                            const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${htmlFileName}</h3></a>`;
+                            resultDiv.innerHTML = `${link}${contextHtml}`;
+                            resultsDiv.appendChild(resultDiv);
+                        }
+                    })
+                    .catch(error => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        resultDiv.textContent = `Error loading ${htmlFileName}`;
+                        resultsDiv.appendChild(resultDiv);
+                        console.error('Error loading HTML file:', error);
+                    });
                 });
-
-                if (matches.length > 0) {
-                    currentMatch = 0;
-                    scrollToMatch();
-                }
-                updateMatchCount();
             }
+        })
+        .catch(error => {
+            console.error('Error fetching or parsing search_index.json:', error);
+        });
 
-            function scrollToMatch() {
-                if (matches.length > 0 && currentMatch >= 0) {
-                    document.querySelectorAll('.highlight')[currentMatch].scrollIntoView({ block: 'center' });
-                }
-            }
-
-            function updateMatchCount() {
-                document.getElementById('matchCount').textContent = matches.length > 0 ? `${currentMatch + 1}/${matches.length}` : '';
-                document.getElementById('prevMatch').disabled = matches.length === 0 || currentMatch <= 0;
-                document.getElementById('nextMatch').disabled = matches.length === 0 || currentMatch >= matches.length - 1;
-            }
-
-            document.getElementById('searchButton').addEventListener('click', performSearch);
-            document.getElementById('searchBox').addEventListener('keydown', event => { if (event.key === 'Enter') performSearch(); });
-            document.getElementById('prevMatch').addEventListener('click', () => { if (currentMatch > 0) { currentMatch--; scrollToMatch(); updateMatchCount(); }});
-            document.getElementById('nextMatch').addEventListener('click', () => { if (currentMatch < matches.length - 1) { currentMatch++; scrollToMatch(); updateMatchCount(); }});
-        }
     </script>
 </body>
 </html>
