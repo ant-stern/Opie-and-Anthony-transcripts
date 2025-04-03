@@ -146,21 +146,24 @@
                 });
             }
 
-            function highlightMatches(element, query, matches) {
-                let content = element.innerHTML;
-                let offset = 0;
+			function highlightMatches(element, query, matches) {
+				console.log("highlightMatches called with:", element, query, matches); // Add this line
+				let content = element.innerHTML;
+				let offset = 0;
 
-                matches.forEach(matchIndex => {
-                    const adjustedMatchIndex = matchIndex + offset;
-                    const highlightStart = adjustedMatchIndex;
-                    const highlightEnd = highlightStart + query.length;
-                    const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-                    content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
-                    offset += highlighted.length - query.length;
-                });
+				matches.forEach(matchIndex => {
+					const adjustedMatchIndex = matchIndex + offset;
+					const highlightStart = adjustedMatchIndex;
+					const highlightEnd = highlightStart + query.length;
+					const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
+					console.log("Adding highlight at:", adjustedMatchIndex); // add this line
+					content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
+					offset += highlighted.length - query.length;
+				});
 
-                element.innerHTML = content;
-            }
+				element.innerHTML = content;
+				console.log("New element content:", element.innerHTML); // add this line
+			}
 
             function performSearch() {
                 const query = document.getElementById('searchBox').value.toLowerCase();
