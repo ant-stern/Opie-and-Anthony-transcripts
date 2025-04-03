@@ -21,8 +21,6 @@
         #controls {
             position: sticky;
             top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -45,6 +43,7 @@
             border-radius: 3px;
             color: black;
             flex-grow: 1;
+            flex-basis: 60%;
             max-width: 400px;
             box-sizing: border-box;
         }
@@ -65,18 +64,19 @@
 
         @media (max-width: 600px) {
             #searchBox {
-                max-width: 200px;
+                max-width: 180px;
                 padding: 6px;
                 font-size: 14px;
-                margin-left: 0px;
+                flex-basis: 70%;
             }
             #searchButton, #prevMatch, #nextMatch {
                 padding: 6px 10px;
                 font-size: 14px;
             }
             #controls {
-                padding: 0px;
                 width: 100%;
+                margin: 0 auto;
+                padding: 0px;
             }
         }
         .highlight {
