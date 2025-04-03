@@ -146,6 +146,22 @@
                 });
             }
 
+            function highlightMatches(element, query, matches) {
+                let content = element.innerHTML;
+                let offset = 0;
+
+                matches.forEach(matchIndex => {
+                    const adjustedMatchIndex = matchIndex + offset;
+                    const highlightStart = adjustedMatchIndex;
+                    const highlightEnd = highlightStart + query.length;
+                    const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
+                    content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
+                    offset += highlighted.length - query.length;
+                });
+
+                element.innerHTML = content;
+            }
+
             function performSearch() {
                 const query = document.getElementById('searchBox').value.toLowerCase();
                 const content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
@@ -162,29 +178,13 @@
                     }
 
                     if (matches.length > 0) {
-                        highlightMatches(query);
+                        highlightMatches(document.getElementById('innerTranscript'), query, matches);
                         currentMatch = 0;
                         scrollToMatch();
                     }
                 }
 
                 updateMatchCount();
-            }
-
-            function highlightMatches(query) {
-                let content = document.getElementById('innerTranscript').innerHTML;
-                let offset = 0;
-
-                matches.forEach(matchIndex => {
-                    const adjustedMatchIndex = matchIndex + offset;
-                    const highlightStart = adjustedMatchIndex;
-                    const highlightEnd = highlightStart + query.length;
-                    const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-                    content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
-                    offset += highlighted.length - query.length;
-                });
-
-                document.getElementById('innerTranscript').innerHTML = content;
             }
 
             function scrollToMatch() {
