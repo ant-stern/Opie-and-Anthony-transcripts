@@ -33,6 +33,11 @@
             z-index: 1000;
             border-radius: 5px;
             margin-bottom: 10px;
+            box-sizing: border-box;
+            width: 95%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         #searchBox {
             margin-right: 10px;
@@ -41,8 +46,9 @@
             border: 1px solid #ddd;
             border-radius: 3px;
             color: black;
-            max-width: 400px;
             flex-grow: 1;
+            max-width: 400px;
+            box-sizing: border-box;
         }
         #searchButton, #prevMatch, #nextMatch {
             padding: 8px 12px;
@@ -52,17 +58,13 @@
             border-radius: 3px;
             cursor: pointer;
             color: black;
+            box-sizing: border-box;
         }
         #matchCount {
             margin: 0 10px;
+            box-sizing: border-box;
         }
-        a {
-            color: lightblue;
-        }
-        .highlight {
-            background-color: orange;
-            color: black;
-        }
+
         @media (max-width: 600px) {
             #searchBox {
                 max-width: 200px;
@@ -74,9 +76,9 @@
                 padding: 6px 10px;
                 font-size: 14px;
             }
-            #controls{
+            #controls {
                 padding: 5px;
-                max-width: 95%;
+                width: 95%;
             }
         }
     </style>
