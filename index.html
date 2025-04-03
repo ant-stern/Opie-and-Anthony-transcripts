@@ -104,9 +104,19 @@
                 }
             });
 
+            function removeHighlights() {
+                const elements = document.querySelectorAll('.highlight');
+                elements.forEach(el => {
+                    const parent = el.parentNode;
+                    parent.replaceChild(document.createTextNode(el.textContent), el);
+                    parent.normalize();
+                });
+            }
+
             function performSearch() {
                 const query = document.getElementById('searchBox').value;
                 const results = idx.search(query);
+                removeHighlights();
                 displayResults(results);
             }
         })

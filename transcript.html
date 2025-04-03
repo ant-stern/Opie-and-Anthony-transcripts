@@ -137,17 +137,22 @@
             let matches = [];
             let currentMatch = -1;
 
+            function removeHighlights() {
+                const elements = document.querySelectorAll('.highlight');
+                elements.forEach(el => {
+                    const parent = el.parentNode;
+                    parent.replaceChild(document.createTextNode(el.textContent), el);
+                    parent.normalize();
+                });
+            }
+
             function performSearch() {
                 const query = document.getElementById('searchBox').value.toLowerCase();
                 const content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
                 matches = [];
                 currentMatch = -1;
 
-                document.querySelectorAll('.highlight').forEach(el => {
-                    const parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
+                removeHighlights();
 
                 if (query) {
                     let index = content.indexOf(query);
