@@ -196,6 +196,7 @@
                                 let contextHtml = '';
                                 let resultCount = 1;
 
+                                // Restore context snippets by iterating through paragraphs
                                 tempDiv.querySelectorAll("p").forEach(p => {
                                     contextHtml += `<p><strong>Result ${resultCount}:</strong> ${p.innerHTML}</p>`;
                                     resultCount++;
