@@ -9,8 +9,8 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 20px;
-            background-color: black; /* Black background */
-            color: white; /* White text */
+            background-color: lightblue; /* Light blue background */
+            color: black; /* Black text */
         }
         #controls {
             position: fixed;
@@ -23,13 +23,11 @@
             border: 1px solid black;
             font-size: 16px;
             z-index: 1000;
-            color: black; /* Black text for controls */
         }
         #searchBox {
             margin-right: 10px;
             padding: 10px;
             font-size: 16px;
-            color: black; /* Black text for input */
         }
         #transcriptContent {
             margin-top: 20px;
@@ -46,7 +44,6 @@
         }
         .highlight {
             background-color: orange;
-            color: black; /* Black text for highlights */
         }
     </style>
 </head>
@@ -122,17 +119,19 @@
             }
 
             function highlightMatches(query) {
-                const content = document.getElementById('innerTranscript').innerHTML;
+                let content = document.getElementById('innerTranscript').innerHTML;
                 let offset = 0;
 
                 matches.forEach(matchIndex => {
-                    const highlightStart = matchIndex + offset;
+                    const adjustedMatchIndex = matchIndex + offset;
+                    const highlightStart = adjustedMatchIndex;
                     const highlightEnd = highlightStart + query.length;
                     const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-                    document.getElementById('innerTranscript').innerHTML =
-                        content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
+                    content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
                     offset += highlighted.length - query.length;
                 });
+
+                document.getElementById('innerTranscript').innerHTML = content;
             }
 
             function scrollToMatch() {
