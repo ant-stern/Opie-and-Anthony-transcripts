@@ -5,16 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Opie and Anthony Transcripts</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: lightblue; color: black; }
-        #controls { position: fixed; top: 10px; right: 10px; display: flex; align-items: center; background: white; padding: 10px; border: 1px solid black; font-size: 16px; z-index: 1000; }
-        #searchBox { margin-right: 10px; padding: 10px; font-size: 16px; }
-        #results { margin-top: 20px; }
-        .result { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; word-wrap: break-word; }
-        .highlight { background-color: orange; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: black; /* Black background */
+            color: white; /* White text */
+        }
+        #logo {
+            width: 250px; /* Logo width */
+            height: 250px; /* Logo height */
+            margin: 20px auto; /* Center the logo */
+            display: block; /* Makes margin auto work */
+        }
+        #controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border: 1px solid black;
+            font-size: 16px;
+            z-index: 1000;
+            color: black; /* Black text for controls */
+        }
+        #searchBox {
+            margin-right: 10px;
+            padding: 10px;
+            font-size: 16px;
+            color: black; /* Black text for input */
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            word-wrap: break-word;
+        }
+        .highlight {
+            background-color: orange;
+            color: black; /* Black text for highlights */
+        }
+
+        a{
+            color: lightblue;
+        }
     </style>
 </head>
 <body>
-    <h1>Opie and Anthony Transcripts</h1>
+    <img id="logo" src="OandAtranscripts.png" alt="Opie and Anthony Transcripts Logo">
     <div id="controls">
         <input type="text" id="searchBox" placeholder="Search transcripts...">
         <button id="searchButton">Search</button>
