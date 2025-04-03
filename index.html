@@ -23,7 +23,7 @@
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            display: inline-flex; /* Change to inline-flex */
+            display: inline-flex;
             align-items: center;
             background-color: #020202;
             padding: 10px;
@@ -55,6 +55,15 @@
         }
         a {
             color: lightblue;
+        }
+        .highlight {
+            background-color: orange;
+            color: black;
+        }
+        @media (max-width: 600px) {
+            #controls {
+                padding: 8px; /* Reduce padding on smaller screens */
+            }
         }
     </style>
 </head>
