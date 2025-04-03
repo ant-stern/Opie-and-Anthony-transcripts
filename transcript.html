@@ -85,6 +85,10 @@
                 width: 95%;
             }
         }
+        .highlight {
+            background-color: orange;
+            color: black;
+        }
     </style>
 </head>
 <body>
@@ -110,13 +114,13 @@
         const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
 
         fetch(basePath + encodeURIComponent(fileName))
-        .then(response => response.text())
-        .then(htmlContent => {
-            htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/<\/pre>/g, '</div>');
-            htmlContent = htmlContent.replace(/\n/g, '<br>');
-            document.getElementById('innerTranscript').innerHTML = htmlContent;
-            setupInPageSearch();
-        });
+            .then(response => response.text())
+            .then(htmlContent => {
+                htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/<\/pre>/g, '</div>');
+                htmlContent = htmlContent.replace(/\n/g, '<br>');
+                document.getElementById('innerTranscript').innerHTML = htmlContent;
+                setupInPageSearch();
+            });
 
         function formatEpisodeTitle(fileName) {
             const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
@@ -136,19 +140,15 @@
         function setupInPageSearch() {
             let matches = [];
             let currentMatch = -1;
+            let originalContent = document.getElementById('innerTranscript').innerHTML; // Store original HTML
 
             function performSearch() {
                 const query = document.getElementById('searchBox').value.toLowerCase();
-                const content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
+                let content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
                 matches = [];
                 currentMatch = -1;
 
-                // Remove Highlights Directly Here
-                document.querySelectorAll('.highlight').forEach(el => {
-                    const parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
+                document.getElementById('innerTranscript').innerHTML = originalContent; // Reset to original
 
                 if (query) {
                     let index = content.indexOf(query);
@@ -158,26 +158,23 @@
                     }
 
                     if (matches.length > 0) {
-                        // Highlight Matches Directly Here
-                        let content = document.getElementById('innerTranscript').innerHTML;
+                        let innerHTML = document.getElementById('innerTranscript').innerHTML;
                         let offset = 0;
 
                         matches.forEach(matchIndex => {
                             const adjustedMatchIndex = matchIndex + offset;
                             const highlightStart = adjustedMatchIndex;
                             const highlightEnd = highlightStart + query.length;
-                            const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-                            content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
+                            const highlighted = `<span class="highlight">${innerHTML.substring(highlightStart, highlightEnd)}</span>`;
+                            innerHTML = innerHTML.substring(0, highlightStart) + highlighted + innerHTML.substring(highlightEnd);
                             offset += highlighted.length - query.length;
                         });
 
-                        document.getElementById('innerTranscript').innerHTML = content;
-
+                        document.getElementById('innerTranscript').innerHTML = innerHTML;
                         currentMatch = 0;
                         scrollToMatch();
                     }
                 }
-
                 updateMatchCount();
             }
 
