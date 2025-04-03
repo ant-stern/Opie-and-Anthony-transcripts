@@ -137,41 +137,18 @@
             let matches = [];
             let currentMatch = -1;
 
-            function removeHighlights() {
-                const elements = document.querySelectorAll('.highlight');
-                elements.forEach(el => {
-                    const parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
-            }
-
-			function highlightMatches(element, query, matches) {
-				console.log("highlightMatches called with:", element, query, matches); // Add this line
-				let content = element.innerHTML;
-				let offset = 0;
-
-				matches.forEach(matchIndex => {
-					const adjustedMatchIndex = matchIndex + offset;
-					const highlightStart = adjustedMatchIndex;
-					const highlightEnd = highlightStart + query.length;
-					const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-					console.log("Adding highlight at:", adjustedMatchIndex); // add this line
-					content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
-					offset += highlighted.length - query.length;
-				});
-
-				element.innerHTML = content;
-				console.log("New element content:", element.innerHTML); // add this line
-			}
-
             function performSearch() {
                 const query = document.getElementById('searchBox').value.toLowerCase();
                 const content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
                 matches = [];
                 currentMatch = -1;
 
-                removeHighlights();
+                // Remove Highlights Directly Here
+                document.querySelectorAll('.highlight').forEach(el => {
+                    const parent = el.parentNode;
+                    parent.replaceChild(document.createTextNode(el.textContent), el);
+                    parent.normalize();
+                });
 
                 if (query) {
                     let index = content.indexOf(query);
@@ -181,7 +158,21 @@
                     }
 
                     if (matches.length > 0) {
-                        highlightMatches(document.getElementById('innerTranscript'), query, matches);
+                        // Highlight Matches Directly Here
+                        let content = document.getElementById('innerTranscript').innerHTML;
+                        let offset = 0;
+
+                        matches.forEach(matchIndex => {
+                            const adjustedMatchIndex = matchIndex + offset;
+                            const highlightStart = adjustedMatchIndex;
+                            const highlightEnd = highlightStart + query.length;
+                            const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
+                            content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
+                            offset += highlighted.length - query.length;
+                        });
+
+                        document.getElementById('innerTranscript').innerHTML = content;
+
                         currentMatch = 0;
                         scrollToMatch();
                     }
