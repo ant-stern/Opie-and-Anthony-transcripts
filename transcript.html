@@ -43,6 +43,8 @@
         fetch(basePath + encodeURIComponent(fileName))
         .then(response => response.text())
         .then(htmlContent => {
+            // Replace <pre> tags
+            htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/<\/pre>/g, '</div>');
             document.getElementById('innerTranscript').innerHTML = htmlContent;
             setupInPageSearch();
         });
