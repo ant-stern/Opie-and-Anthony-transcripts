@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcript</title>
+    <title>Opie and Anthony Transcripts</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 20px;
-            background-color: #020202;
+            background-color: black;
             color: white;
         }
         #logo {
-            width: 250px; /* Logo width */
-            height: 250px; /* Logo height */
-            margin: 20px auto; /* Center the logo */
-            display: block; /* Makes margin auto work */
-        }
-        #episodeTitle {
-            text-align: center;
-            margin-bottom: 20px;
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            display: block;
         }
         #controls {
             position: sticky;
@@ -39,13 +35,10 @@
             margin-right: 10px;
             padding: 10px;
             font-size: 16px;
+            color: black;
         }
-        #transcriptContent {
+        #results {
             margin-top: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            width: 90%;
         }
         .result {
             margin-bottom: 10px;
@@ -55,146 +48,136 @@
         }
         .highlight {
             background-color: orange;
+            color: black;
+        }
+        a {
+            color: lightblue;
         }
     </style>
 </head>
 <body>
     <img id="logo" src="OandAtranscripts.png" alt="Opie and Anthony Transcripts Logo">
-    <h1 id="episodeTitle"></h1>
     <div id="controls">
-        <input type="text" id="searchBox" placeholder="Search this transcript...">
+        <input type="text" id="searchBox" placeholder="Search transcripts...">
         <button id="searchButton">Search</button>
-        <button id="prevMatch" disabled>&uarr;</button>
-        <span id="matchCount"></span>
-        <button id="nextMatch" disabled>&darr;</button>
     </div>
-    <div id="transcriptContent">
-        <div id="innerTranscript"></div>
-    </div>
+    <div id="results"></div>
 
+    <script src="lunr.js"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const fileName = urlParams.get('file');
-
-        document.title = fileName.replace('.html', '');
-
-        const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
-
-        fetch(basePath + encodeURIComponent(fileName))
-        .then(response => response.text())
-        .then(htmlContent => {
-            htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/<\/pre>/g, '</div>');
-            htmlContent = htmlContent.replace(/\n/g, '<br>');
-            document.getElementById('innerTranscript').innerHTML = htmlContent;
-            setupInPageSearch();
-        });
-
-        function formatEpisodeTitle(fileName) {
-            const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
-            if (parts) {
-                const year = parts[1];
-                const month = parseInt(parts[2]) - 1;
-                const day = parts[3];
-                const date = new Date(year, month, day);
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                return date.toLocaleDateString('en-US', options);
-            }
-            return fileName;
-        }
-
-        document.getElementById('episodeTitle').textContent = formatEpisodeTitle(fileName);
-
-        function setupInPageSearch() {
-            let matches = [];
-            let currentMatch = -1;
-
-            function performSearch() {
-                const query = document.getElementById('searchBox').value.toLowerCase();
-                const content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
-                matches = [];
-                currentMatch = -1;
-
-                document.querySelectorAll('.highlight').forEach(el => {
-                    const parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
-
-                if (query) {
-                    let index = content.indexOf(query);
-                    while (index !== -1) {
-                        matches.push(index);
-                        index = content.indexOf(query, index + 1);
-                    }
-
-                    if (matches.length > 0) {
-                        highlightMatches(query);
-                        currentMatch = 0;
-                        scrollToMatch();
-                    }
-                }
-
-                updateMatchCount();
-            }
-
-            function highlightMatches(query) {
-                let content = document.getElementById('innerTranscript').innerHTML;
-                let offset = 0;
-
-                matches.forEach(matchIndex => {
-                    const adjustedMatchIndex = matchIndex + offset;
-                    const highlightStart = adjustedMatchIndex;
-                    const highlightEnd = highlightStart + query.length;
-                    const highlighted = `<span class="highlight">${content.substring(highlightStart, highlightEnd)}</span>`;
-                    content = content.substring(0, highlightStart) + highlighted + content.substring(highlightEnd);
-                    offset += highlighted.length - query.length;
-                });
-
-                document.getElementById('innerTranscript').innerHTML = content;
-            }
-
-            function scrollToMatch() {
-                if (matches.length > 0 && currentMatch >= 0) {
-                    try {
-                        const highlighted = document.querySelectorAll('.highlight')[currentMatch];
-                        if (highlighted) {
-                            highlighted.scrollIntoView({ block: 'center' });
-                        }
-                    } catch (error) {
-                        console.error('Error scrolling to match:', error);
-                    }
-                }
-            }
-
-            function updateMatchCount() {
-                document.getElementById('matchCount').textContent = matches.length > 0 ? `${currentMatch + 1}/${matches.length}` : '';
-                document.getElementById('prevMatch').disabled = matches.length === 0 || currentMatch <= 0;
-                document.getElementById('nextMatch').disabled = matches.length === 0 || currentMatch >= matches.length - 1;
-            }
-
-            document.getElementById('searchButton').addEventListener('click', function() {
-                performSearch();
-            });
+        fetch('search_index.json')
+        .then(response => response.json())
+        .then(data => {
+            const idx = lunr.Index.load(data);
+            document.getElementById('searchButton').addEventListener('click', performSearch);
             document.getElementById('searchBox').addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     performSearch();
                 }
             });
 
-            document.getElementById('prevMatch').addEventListener('click', () => {
-                if (currentMatch > 0) {
-                    currentMatch--;
-                    scrollToMatch();
-                    updateMatchCount();
+            function performSearch() {
+                const query = document.getElementById('searchBox').value;
+                const results = idx.search(query);
+                displayResults(results);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching or parsing search_index.json:', error);
+        });
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            const processedFiles = new Set();
+
+            results.sort((a, b) => {
+                const partsA = a.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                const partsB = b.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+
+                if (partsA && partsB) {
+                    const yearA = parseInt(partsA[1]);
+                    const monthA = parseInt(partsA[2]);
+                    const dayA = parseInt(partsA[3]);
+                    const yearB = parseInt(partsB[1]);
+                    const monthB = parseInt(partsB[2]);
+                    const dayB = parseInt(partsB[3]);
+
+                    if (yearA !== yearB) return yearA - yearB;
+                    if (monthA !== monthB) return monthA - monthB;
+                    return dayA - dayB;
                 }
+                return 0;
             });
 
-            document.getElementById('nextMatch').addEventListener('click', () => {
-                if (currentMatch < matches.length - 1) {
-                    currentMatch++;
-                    scrollToMatch();
-                    updateMatchCount();
+            results.forEach(result => {
+                const htmlFileName = result.ref;
+                if (processedFiles.has(htmlFileName)) {
+                    return;
                 }
+                processedFiles.add(htmlFileName);
+
+                fetch('html_transcripts/' + htmlFileName)
+                .then(response => response.text())
+                .then(htmlContent => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlContent;
+                    let textContent = tempDiv.textContent;
+                    const indices = [];
+                    let index = textContent.toLowerCase().indexOf(query);
+                    while (index !== -1) {
+                        indices.push(index);
+                        index = textContent.toLowerCase().indexOf(query, index + 1);
+                    }
+
+                    if (indices.length > 0) {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        let contextHtml = '';
+                        let resultCount = 1;
+
+                        const usedIndices = new Set();
+
+                        indices.forEach(matchIndex => {
+                            if (usedIndices.has(matchIndex)) {
+                                return;
+                            }
+
+                            const start = Math.max(0, matchIndex - 200);
+                            const end = Math.min(textContent.length, matchIndex + query.length + 200);
+                            let context = textContent.substring(start, end);
+
+                            for (let i = start; i < end; i++) {
+                                usedIndices.add(i);
+                            }
+
+                            if (start > 0) context = '... ' + context;
+                            if (end < textContent.length) context = context + ' ...';
+
+                            const highlightStart = context.toLowerCase().indexOf(query);
+                            if (highlightStart !== -1) {
+                                context = context.substring(0, highlightStart) +
+                                    `<span class="highlight">${context.substring(highlightStart, highlightStart + query.length)}</span>` +
+                                    context.substring(highlightStart + query.length);
+                            }
+
+                            contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`;
+                            resultCount++;
+                        });
+
+                        const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${htmlFileName}</h3></a>`;
+                        resultDiv.innerHTML = `${link}${contextHtml}`;
+                        resultsDiv.appendChild(resultDiv);
+                    }
+                })
+                .catch(error => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.textContent = `Error loading ${htmlFileName}`;
+                    resultsDiv.appendChild(resultDiv);
+                    console.error('Error loading HTML file:', error);
+                });
             });
         }
     </script>

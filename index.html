@@ -9,18 +9,19 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             padding: 20px;
-            background-color: #020202; /* Black background */
-            color: white; /* White text */
+            background-color: black;
+            color: white;
         }
         #logo {
-            width: 250px; /* Logo width */
-            height: 250px; /* Logo height */
-            margin: 20px auto; /* Center the logo */
-            display: block; /* Makes margin auto work */
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            display: block;
         }
         #controls {
-            position: fixed;
+            position: sticky;
             top: 10px;
+            left: 10px;
             right: 10px;
             display: flex;
             align-items: center;
@@ -29,13 +30,12 @@
             border: 1px solid black;
             font-size: 16px;
             z-index: 1000;
-            color: black; /* Black text for controls */
         }
         #searchBox {
             margin-right: 10px;
             padding: 10px;
             font-size: 16px;
-            color: black; /* Black text for input */
+            color: black;
         }
         #results {
             margin-top: 20px;
@@ -48,10 +48,9 @@
         }
         .highlight {
             background-color: orange;
-            color: black; /* Black text for highlights */
+            color: black;
         }
-
-        a{
+        a {
             color: lightblue;
         }
     </style>
@@ -66,16 +65,10 @@
 
     <script src="lunr.js"></script>
     <script>
-        console.log('script started');
         fetch('search_index.json')
-        .then(response => {
-            console.log('search_index.json fetched');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('search_index.json parsed');
             const idx = lunr.Index.load(data);
-            console.log('lunr index loaded');
             document.getElementById('searchButton').addEventListener('click', performSearch);
             document.getElementById('searchBox').addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
@@ -84,10 +77,8 @@
             });
 
             function performSearch() {
-                console.log('search box input');
                 const query = document.getElementById('searchBox').value;
                 const results = idx.search(query);
-                console.log('search results:', results);
                 displayResults(results);
             }
         })
@@ -96,10 +87,10 @@
         });
 
         function displayResults(results) {
-            console.log('displayResults called');
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
             const query = document.getElementById('searchBox').value.toLowerCase();
+            const processedFiles = new Set();
 
             results.sort((a, b) => {
                 const partsA = a.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
@@ -122,6 +113,11 @@
 
             results.forEach(result => {
                 const htmlFileName = result.ref;
+                if (processedFiles.has(htmlFileName)) {
+                    return;
+                }
+                processedFiles.add(htmlFileName);
+
                 fetch('html_transcripts/' + htmlFileName)
                 .then(response => response.text())
                 .then(htmlContent => {
@@ -141,10 +137,20 @@
                         let contextHtml = '';
                         let resultCount = 1;
 
+                        const usedIndices = new Set();
+
                         indices.forEach(matchIndex => {
+                            if (usedIndices.has(matchIndex)) {
+                                return;
+                            }
+
                             const start = Math.max(0, matchIndex - 200);
                             const end = Math.min(textContent.length, matchIndex + query.length + 200);
                             let context = textContent.substring(start, end);
+
+                            for (let i = start; i < end; i++) {
+                                usedIndices.add(i);
+                            }
 
                             if (start > 0) context = '... ' + context;
                             if (end < textContent.length) context = context + ' ...';
@@ -160,7 +166,6 @@
                             resultCount++;
                         });
 
-                        // Create link to transcript page
                         const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${htmlFileName}</h3></a>`;
                         resultDiv.innerHTML = `${link}${contextHtml}`;
                         resultsDiv.appendChild(resultDiv);
