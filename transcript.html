@@ -25,13 +25,10 @@
         #controls {
             position: sticky;
             top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #020202;
-            padding: 10px;
             border: 1px solid #ccc;
             font-size: 16px;
             z-index: 1000;
@@ -44,13 +41,13 @@
             margin-right: auto;
         }
         #searchBox {
-            margin-right: 10px;
             padding: 8px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 3px;
             color: black;
             flex-grow: 1;
+            flex-basis: 60%;
             max-width: 400px;
             box-sizing: border-box;
         }
@@ -71,18 +68,19 @@
 
         @media (max-width: 600px) {
             #searchBox {
-                max-width: 200px;
+                max-width: 180px;
                 padding: 6px;
                 font-size: 14px;
-                margin-right: 5px;
+                flex-basis: 70%;
             }
             #searchButton, #prevMatch, #nextMatch {
                 padding: 6px 10px;
                 font-size: 14px;
             }
             #controls {
-                padding: 5px;
-                width: 95%;
+                width: 100%;
+                margin: 0 auto;
+                padding: 0px;
             }
         }
         .highlight {
