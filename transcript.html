@@ -25,9 +25,12 @@
         #controls {
             position: sticky;
             top: 10px;
+            width: 90%;
+            max-width: 600px;
             left: 50%;
             transform: translateX(-50%);
-            display: inline-flex;
+            display: flex;
+            justify-content: center;
             align-items: center;
             background-color: #020202;
             padding: 10px;
@@ -45,6 +48,7 @@
             border-radius: 3px;
             color: black;
             max-width: 400px;
+            flex-grow: 1;
         }
         #searchButton, #prevMatch, #nextMatch {
             padding: 8px 12px;
@@ -87,6 +91,7 @@
             }
             #controls{
                 padding:5px;
+                width: 95%;
             }
         }
     </style>
