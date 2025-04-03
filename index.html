@@ -40,6 +40,7 @@
             border: 1px solid #ddd;
             border-radius: 3px;
             color: black;
+            max-width: 400px;
         }
         #searchButton, #prevMatch, #nextMatch {
             padding: 8px 12px;
@@ -61,8 +62,18 @@
             color: black;
         }
         @media (max-width: 600px) {
-            #controls {
-                padding: 8px; /* Reduce padding on smaller screens */
+            #searchBox {
+                max-width: 200px;
+                padding: 6px;
+                font-size: 14px;
+                margin-right: 5px;
+            }
+            #searchButton, #prevMatch, #nextMatch {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+            #controls{
+                padding:5px;
             }
         }
     </style>
