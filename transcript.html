@@ -13,10 +13,10 @@
             color: white;
         }
         #logo {
-            width: 250px; /* Logo width */
-            height: 250px; /* Logo height */
-            margin: 20px auto; /* Center the logo */
-            display: block; /* Makes margin auto work */
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            display: block;
         }
         #episodeTitle {
             text-align: center;
@@ -25,20 +25,38 @@
         #controls {
             position: sticky;
             top: 10px;
-            left: 10px;
-            right: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
             display: flex;
             align-items: center;
-            background: white;
+            background-color: #020202; /* Background color matches page background */
             padding: 10px;
-            border: 1px solid black;
+            border: 1px solid #ccc;
             font-size: 16px;
             z-index: 1000;
+            border-radius: 5px;
+            margin-bottom: 10px;
         }
         #searchBox {
             margin-right: 10px;
-            padding: 10px;
+            padding: 8px;
             font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            color: black;
+        }
+        #searchButton, #prevMatch, #nextMatch {
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            cursor: pointer;
+            color: black;
+        }
+        #matchCount {
+            margin: 0 10px;
         }
         #transcriptContent {
             margin-top: 20px;
