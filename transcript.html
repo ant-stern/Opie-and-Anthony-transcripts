@@ -113,7 +113,7 @@
 
         document.title = fileName.replace('.html', '');
 
-        const basePath = "https://ant-stern.github.io/Opie-and-Anthony-transcripts/html_transcripts/";
+        const basePath = "html_transcripts";
 
         fetch(basePath + encodeURIComponent(fileName))
             .then(response => response.text())
