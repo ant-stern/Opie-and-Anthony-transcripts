@@ -97,7 +97,7 @@
             color: orange;
             text-decoration: none;
         }
-        #results p { /* Ensure snippet text is white */
+        #results p {
             color: white;
         }
     </style>
@@ -197,39 +197,55 @@
                                     const resultDiv = document.createElement('div');
                                     resultDiv.className = 'result';
                                     let contextHtml = '';
+                                    let resultCount = 1;
 
-                                    let indices = [];
+                                    let allIndices = [];
                                     if (isNonConsecutive) {
                                         keywords.forEach(keyword => {
                                             let index = textContent.indexOf(keyword);
                                             while (index !== -1) {
-                                                indices.push({ index: index, keyword: keyword });
+                                                allIndices.push({ index: index, keyword: keyword });
                                                 index = textContent.indexOf(keyword, index + 1);
                                             }
                                         });
                                     } else {
                                         let index = textContent.indexOf(query);
                                         while (index !== -1) {
-                                            indices.push({ index: index, keyword: query });
+                                            allIndices.push({ index: index, keyword: query });
                                             index = textContent.indexOf(query, index + 1);
                                         }
                                     }
 
-                                    indices.sort((a, b) => a.index - b.index);
+                                    allIndices.sort((a, b) => a.index - b.index);
 
-                                    let highlightedText = tempDiv.textContent;
-                                    let offset = 0;
+                                    const usedIndices = new Set();
 
-                                    indices.forEach(match => {
-                                        const highlightStart = match.index + offset;
-                                        const highlightEnd = highlightStart + match.keyword.length;
-                                        highlightedText = highlightedText.substring(0, highlightStart) +
-                                            `<span class="highlight">${highlightedText.substring(highlightStart, highlightEnd)}</span>` +
-                                            highlightedText.substring(highlightEnd);
-                                        offset += `<span class="highlight">`.length + `</span>`.length;
+                                    allIndices.forEach(matchInfo => {
+                                        if (usedIndices.has(matchInfo.index)) {
+                                            return;
+                                        }
+
+                                        const start = Math.max(0, matchInfo.index - 200);
+                                        const end = Math.min(tempDiv.textContent.length, matchInfo.index + matchInfo.keyword.length + 200);
+                                        let context = tempDiv.textContent.substring(start, end);
+
+                                        for (let i = start; i < end; i++) {
+                                            usedIndices.add(i);
+                                        }
+
+                                        if (start > 0) context = '... ' + context;
+                                        if (end < tempDiv.textContent.length) context = context + ' ...';
+
+                                        let highlightStart = context.toLowerCase().indexOf(matchInfo.keyword);
+                                        if (highlightStart !== -1) {
+                                            context = context.substring(0, highlightStart) +
+                                                `<span class="highlight">${context.substring(highlightStart, highlightStart + matchInfo.keyword.length)}</span>` +
+                                                context.substring(highlightStart + matchInfo.keyword.length);
+                                        }
+
+                                        contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`;
+                                        resultCount++;
                                     });
-
-                                    contextHtml = `<p>${highlightedText}</p>`;
 
                                     const formattedTitle = formatEpisodeTitle(htmlFileName);
                                     const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${formattedTitle}</h3></a>`;
