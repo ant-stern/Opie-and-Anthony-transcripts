@@ -106,6 +106,7 @@
     <img id="logo" src="OandAtranscripts.png" alt="Opie and Anthony Transcripts Logo">
     <div id="searchInstructions">
         High quality AI-generated transcripts for the Opie and Anthony Show, 1998-2014. '98 and '99 are incomplete but every show from 2000 onward is transcribed.<br><br>Search keywords to narrow down the transcripts. Click on a date to see the full transcript and search within it.
+    </div>
     <div id="controls">
         <input type="text" id="searchBox" placeholder="Scan all transcripts...">
         <button id="searchButton">Search</button>
@@ -128,7 +129,7 @@
                 function performSearch() {
                     const query = document.getElementById('searchBox').value;
                     const results = idx.search(query);
-                    displayResults(results);
+                    displayResults(results, query);
                 }
 
                 function formatEpisodeTitle(fileName) {
@@ -144,10 +145,12 @@
                     return fileName;
                 }
 
-                function displayResults(results) {
+                function displayResults(results, originalQuery) {
                     const resultsDiv = document.getElementById('results');
                     resultsDiv.innerHTML = '';
-                    const query = document.getElementById('searchBox').value.toLowerCase();
+                    const query = originalQuery.toLowerCase();
+                    const isNonConsecutive = query.includes('+');
+                    const keywords = isNonConsecutive ? query.split('+').map(k => k.trim()) : query.split(' ');
                     const processedFiles = new Set();
 
                     results.sort((a, b) => {
@@ -181,51 +184,55 @@
                             .then(htmlContent => {
                                 const tempDiv = document.createElement('div');
                                 tempDiv.innerHTML = htmlContent;
-                                let textContent = tempDiv.textContent;
-                                const indices = [];
-                                let index = textContent.toLowerCase().indexOf(query);
-                                while (index !== -1) {
-                                    indices.push(index);
-                                    index = textContent.toLowerCase().indexOf(query, index + 1);
+                                let textContent = tempDiv.textContent.toLowerCase();
+
+                                let match = false;
+                                if (isNonConsecutive) {
+                                    match = keywords.every(keyword => textContent.includes(keyword));
+                                } else {
+                                    match = textContent.includes(query);
                                 }
 
-                                if (indices.length > 0) {
+                                if (match) {
                                     const resultDiv = document.createElement('div');
                                     resultDiv.className = 'result';
                                     let contextHtml = '';
-                                    let resultCount = 1;
 
-                                    const usedIndices = new Set();
-
-                                    indices.forEach(matchIndex => {
-                                        if (usedIndices.has(matchIndex)) {
-                                            return;
+                                    let indices = [];
+                                    if (isNonConsecutive) {
+                                        keywords.forEach(keyword => {
+                                            let index = textContent.indexOf(keyword);
+                                            while (index !== -1) {
+                                                indices.push({ index: index, keyword: keyword });
+                                                index = textContent.indexOf(keyword, index + 1);
+                                            }
+                                        });
+                                    } else {
+                                        let index = textContent.indexOf(query);
+                                        while (index !== -1) {
+                                            indices.push({ index: index, keyword: query });
+                                            index = textContent.indexOf(query, index + 1);
                                         }
+                                    }
 
-                                        const start = Math.max(0, matchIndex - 200);
-                                        const end = Math.min(textContent.length, matchIndex + query.length + 200);
-                                        let context = textContent.substring(start, end);
+                                    indices.sort((a, b) => a.index - b.index);
 
-                                        for (let i = start; i < end; i++) {
-                                            usedIndices.add(i);
-                                        }
+                                    let highlightedText = tempDiv.textContent;
+                                    let offset = 0;
 
-                                        if (start > 0) context = '... ' + context;
-                                        if (end < textContent.length) context = context + ' ...';
-
-                                        const highlightStart = context.toLowerCase().indexOf(query);
-                                        if (highlightStart !== -1) {
-                                            context = context.substring(0, highlightStart) +
-                                                `<span class="highlight">${context.substring(highlightStart, highlightStart + query.length)}</span>` +
-                                                context.substring(highlightStart + query.length);
-                                        }
-
-                                        contextHtml += `<p><strong>Result ${resultCount}:</strong> ${context}</p>`;
-                                        resultCount++;
+                                    indices.forEach(match => {
+                                        const highlightStart = match.index + offset;
+                                        const highlightEnd = highlightStart + match.keyword.length;
+                                        highlightedText = highlightedText.substring(0, highlightStart) +
+                                            `<span class="highlight">${highlightedText.substring(highlightStart, highlightEnd)}</span>` +
+                                            highlightedText.substring(highlightEnd);
+                                        offset += `<span class="highlight">`.length + `</span>`.length;
                                     });
 
-                                    const formattedTitle = formatEpisodeTitle(htmlFileName); // Use formatEpisodeTitle
-                                    const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${formattedTitle}</h3></a>`; // Use formattedTitle
+                                    contextHtml = `<p>${highlightedText}</p>`;
+
+                                    const formattedTitle = formatEpisodeTitle(htmlFileName);
+                                    const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${formattedTitle}</h3></a>`;
                                     resultDiv.innerHTML = `${link}${contextHtml}`;
                                     resultsDiv.appendChild(resultDiv);
                                 }
@@ -243,7 +250,6 @@
             .catch(error => {
                 console.error('Error fetching or parsing search_index.json:', error);
             });
-
     </script>
 </body>
 </html>
