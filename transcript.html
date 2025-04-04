@@ -67,7 +67,7 @@
             box-sizing: border-box;
         }
         #transcriptContent {
-            margin-top: 20px; /* Added margin-top */
+            margin-top: 20px;
         }
 
         @media (max-width: 600px) {
@@ -142,35 +142,76 @@
         function setupInPageSearch() {
             let matches = [];
             let currentMatch = -1;
-            let originalContent = document.getElementById('innerTranscript').innerHTML; // Store original HTML
+            let originalContent = document.getElementById('innerTranscript').innerHTML;
 
             function performSearch() {
-                const query = document.getElementById('searchBox').value.toLowerCase();
+                const originalQuery = document.getElementById('searchBox').value;
+                const query = originalQuery.toLowerCase();
+                const isNonConsecutive = query.includes('+');
+                const keywords = isNonConsecutive ? query.split('+').map(k => k.trim()) : query.split(' ');
                 let content = document.getElementById('innerTranscript').innerHTML.toLowerCase();
                 matches = [];
                 currentMatch = -1;
 
-                document.getElementById('innerTranscript').innerHTML = originalContent; // Reset to original
+                document.getElementById('innerTranscript').innerHTML = originalContent;
 
                 if (query) {
-                    let index = content.indexOf(query);
-                    while (index !== -1) {
-                        matches.push(index);
-                        index = content.indexOf(query, index + 1);
+                    if (isNonConsecutive) {
+                        let allIndices = [];
+                        keywords.forEach(keyword => {
+                            let index = content.indexOf(keyword);
+                            while (index !== -1) {
+                                allIndices.push({ index: index, keyword: keyword });
+                                index = content.indexOf(keyword, index + 1);
+                            }
+                        });
+
+                        if (keywords.every(keyword => content.includes(keyword))) {
+                            allIndices.sort((a, b) => a.index - b.index);
+                            matches = allIndices.map(item => item.index);
+                        }
+
+                    } else {
+                        let index = content.indexOf(query);
+                        while (index !== -1) {
+                            matches.push(index);
+                            index = content.indexOf(query, index + 1);
+                        }
                     }
 
                     if (matches.length > 0) {
                         let innerHTML = document.getElementById('innerTranscript').innerHTML;
                         let offset = 0;
 
-                        matches.forEach(matchIndex => {
-                            const adjustedMatchIndex = matchIndex + offset;
-                            const highlightStart = adjustedMatchIndex;
-                            const highlightEnd = highlightStart + query.length;
-                            const highlighted = `<span class="highlight">${innerHTML.substring(highlightStart, highlightEnd)}</span>`;
-                            innerHTML = innerHTML.substring(0, highlightStart) + highlighted + innerHTML.substring(highlightEnd);
-                            offset += highlighted.length - query.length;
-                        });
+                        if (isNonConsecutive) {
+                            let allIndices = [];
+                            keywords.forEach(keyword => {
+                                let index = content.indexOf(keyword);
+                                while (index !== -1) {
+                                    allIndices.push({ index: index, keyword: keyword });
+                                    index = content.indexOf(keyword, index + 1);
+                                }
+                            });
+                            allIndices.sort((a, b) => a.index - b.index);
+
+                            allIndices.forEach(matchInfo => {
+                                const adjustedMatchIndex = matchInfo.index + offset;
+                                const highlightStart = adjustedMatchIndex;
+                                const highlightEnd = highlightStart + matchInfo.keyword.length;
+                                const highlighted = `<span class="highlight">${innerHTML.substring(highlightStart, highlightEnd)}</span>`;
+                                innerHTML = innerHTML.substring(0, highlightStart) + highlighted + innerHTML.substring(highlightEnd);
+                                offset += highlighted.length - matchInfo.keyword.length;
+                            });
+                        } else {
+                            matches.forEach(matchIndex => {
+                                const adjustedMatchIndex = matchIndex + offset;
+                                const highlightStart = adjustedMatchIndex;
+                                const highlightEnd = highlightStart + query.length;
+                                const highlighted = `<span class="highlight">${innerHTML.substring(highlightStart, highlightEnd)}</span>`;
+                                innerHTML = innerHTML.substring(0, highlightStart) + highlighted + innerHTML.substring(highlightEnd);
+                                offset += highlighted.length - query.length;
+                            });
+                        }
 
                         document.getElementById('innerTranscript').innerHTML = innerHTML;
                         currentMatch = 0;
