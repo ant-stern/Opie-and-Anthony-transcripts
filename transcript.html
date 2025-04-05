@@ -109,13 +109,18 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const fileName = urlParams.get('file');
+        let fileName = urlParams.get('file');
+
+        // Decode the filename
+        fileName = decodeURIComponent(fileName);
 
         document.title = fileName.replace('.html', '');
 
-        const basePath = "html_transcripts";
+        const basePath = "html_transcripts/";
+        const fullUrl = basePath + encodeURIComponent(fileName);
+        console.log("Fetching:", fullUrl);
 
-        fetch(basePath + encodeURIComponent(fileName))
+        fetch(fullUrl)
             .then(response => response.text())
             .then(htmlContent => {
                 htmlContent = htmlContent.replace(/<pre>/g, '<div>').replace(/<\/pre>/g, '</div>');
