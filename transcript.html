@@ -70,9 +70,9 @@
             margin-top: 20px;
         }
         #innerTranscript {
-            max-width: 800px; /* Limit width of transcript content */
-            margin: 0 auto; /* Center the transcript content */
-            padding: 0 10px; /* Add some padding on the sides */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 10px;
         }
         @media (max-width: 600px) {
             #searchBox {
@@ -95,9 +95,28 @@
             background-color: orange;
             color: black;
         }
+        /* New Styles for Links */
+        #topLinks {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+        }
+        #topLinks a {
+            color: #FDD600;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        #topLinks a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+    <div id="topLinks">
+        <a href="http://podcasttranscripts.org">Home</a>
+        <a href="http://podcasttranscripts.org/about.html">About</a>
+    </div>
     <a href="index.html"> <img id="logo" src="OandAlogo.jpg" alt="Opie and Anthony Transcripts Logo"> </a>
     <div id="controls">
         <input type="text" id="searchBox" placeholder="Search this transcript...">
