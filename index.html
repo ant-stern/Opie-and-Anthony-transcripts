@@ -42,16 +42,14 @@
             margin-bottom: 10px;
             font-size: 1.1em;
             font-weight: normal;
-        }        #controls {
-            position: sticky;
-            top: 10px;
+        }
+        #controls {
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #020202;
             border: 1px solid #ccc;
             font-size: 16px;
-            z-index: 1000;
             border-radius: 5px;
             margin-top: 20px;
             margin-bottom: 10px;
@@ -122,7 +120,11 @@
     </style>
 </head>
 <body>
-    <img id="logo" src="OandAtranscripts.png" alt="Opie and Anthony Transcripts Logo">
+    <img id="logo" src="OandAlogo.png" alt="Opie and Anthony Transcripts Logo">
+    <div id="controls">
+        <input type="text" id="searchBox" placeholder="Scan all transcripts...">
+        <button id="searchButton">Search</button>
+    </div>
     <div id="searchInstructions">
         <h3>High quality AI-generated transcripts for the Opie and Anthony Show.</h3>
         <ul>
@@ -131,10 +133,6 @@
             <li>Separate keywords with a "+" to search for more than one. For example, searching "Norton + voyeur bus" will return transcripts that contain both "Norton" and "voyeur bus" anywhere in the file.</li>
             <li>Click the episode date to open the full transcript.</li>
         </ul>
-    </div>
-    <div id="controls">
-        <input type="text" id="searchBox" placeholder="Scan all transcripts...">
-        <button id="searchButton">Search</button>
     </div>
     <div id="results"></div>
 
