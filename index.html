@@ -213,14 +213,14 @@
                         return 0;
                     });
 
-                    results.forEach(result => {
+                    const fetchPromises = results.map(result => {
                         const htmlFileName = result.ref;
                         if (processedFiles.has(htmlFileName)) {
-                            return;
+                            return Promise.resolve(null); // Skip already processed files
                         }
                         processedFiles.add(htmlFileName);
 
-                        fetch('html_transcripts/' + htmlFileName)
+                        return fetch('html_transcripts/' + htmlFileName)
                             .then(response => response.text())
                             .then(htmlContent => {
                                 const tempDiv = document.createElement('div');
@@ -290,17 +290,41 @@
 
                                     const formattedTitle = formatEpisodeTitle(htmlFileName);
                                     const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${formattedTitle}</h3></a>`;
-                                    resultDiv.innerHTML = `${link}${contextHtml}`;
-                                    resultsDiv.appendChild(resultDiv);
+                                    return { html: `${link}${contextHtml}`, date: result.ref }; // return result data
                                 }
+                                return null; // return null if no match found
                             })
                             .catch(error => {
-                                const resultDiv = document.createElement('div');
-                                resultDiv.className = 'result';
-                                resultDiv.textContent = `Error loading ${htmlFileName}`;
-                                resultsDiv.appendChild(resultDiv);
                                 console.error('Error loading HTML file:', error);
+                                return { html: `<div class="result">Error loading ${htmlFileName}</div>`, date: result.ref }; // return error message
                             });
+                    });
+                    Promise.all(fetchPromises).then(resultData => {
+                        const validResults = resultData.filter(result => result !== null); // filter out null results
+                        validResults.sort((a, b) => {
+                            const partsA = a.date.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                            const partsB = b.date.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+
+                            if (partsA && partsB) {
+                                const yearA = parseInt(partsA[1]);
+                                const monthA = parseInt(partsA[2]);
+                                const dayA = parseInt(partsA[3]);
+                                const yearB = parseInt(partsB[1]);
+                                const monthB = parseInt(partsB[2]);
+                                const dayB = parseInt(partsB[3]);
+
+                                if (yearA !== yearB) return yearA - yearB;
+                                if (monthA !== monthB) return monthA - monthB;
+                                return dayA - dayB;
+                            }
+                            return 0;
+                        });
+                        validResults.forEach(result => {
+                            const resultDiv = document.createElement('div');
+                            resultDiv.className = 'result';
+                            resultDiv.innerHTML = result.html;
+                            resultsDiv.appendChild(resultDiv);
+                        });
                     });
                 }
             })
