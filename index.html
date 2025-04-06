@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Opie and Anthony Transcripts</title>
@@ -132,7 +134,9 @@
             margin-right: auto; /* Center horizontally */
             padding: 0 10px; /* Add some padding for visual spacing */
         }
-    </style></head><body>
+    </style>
+</head>
+<body>
     <div id="topLinks">
         <a href="http://podcasttranscripts.org">Home</a>
         <a href="http://podcasttranscripts.org/about.html">About</a>
@@ -144,7 +148,7 @@
     </div>
     <div id="searchInstructions">
         <ul style="margin-top: 20px;">
-            <li>The database contains every show from March 2001 onward and many from '98, '99, and 2000 as well.</li>
+            <li>Shows from 1994-2014, but the record starts to become much more complete from 2001 onward.</li>
             <li>Separate keywords/keyphrases with a "+" if you want to search for more than one. E.g. "Jim Norton + voyeur bus" would return all transcripts containing both of those phrases.</li>
             <li>Be creative when searching proper nouns/made-up words. If "Jay Mohr" doesn't yield any results, try "J. Mohr", "J More", "Jay Moore", etc.</li>
             <li>Click the episode date to open the full transcript.</li>
@@ -176,14 +180,14 @@
                 }
 
                 function formatEpisodeTitle(fileName) {
-                    const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                    const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
                     if (parts) {
                         const year = parts[1];
                         const month = parseInt(parts[2]) - 1;
                         const day = parts[3];
                         const date = new Date(year, month, day);
                         const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                        return date.toLocaleDateString('en-US', options);
+                        return date.toLocaleDateString('en-US', options) + (parts[4] ? ` ${parts[4]}` : '');
                     }
                     return fileName;
                 }
@@ -196,20 +200,23 @@
                     const processedFiles = new Set();
 
                     results.sort((a, b) => {
-                        const partsA = a.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
-                        const partsB = b.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                        const partsA = a.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
+                        const partsB = b.ref.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
 
                         if (partsA && partsB) {
                             const yearA = parseInt(partsA[1]);
                             const monthA = parseInt(partsA[2]);
                             const dayA = parseInt(partsA[3]);
+                            const partA = partsA[4] || '';
                             const yearB = parseInt(partsB[1]);
                             const monthB = parseInt(partsB[2]);
                             const dayB = parseInt(partsB[3]);
+                            const partB = partsB[4] || '';
 
                             if (yearA !== yearB) return yearA - yearB;
                             if (monthA !== monthB) return monthA - monthB;
-                            return dayA - dayB;
+                            if (dayA !== dayB) return dayA - dayB;
+                            return partA.localeCompare(partB);
                         }
                         return 0;
                     });
@@ -217,7 +224,7 @@
                     const fetchPromises = results.map(result => {
                         const htmlFileName = result.ref;
                         if (processedFiles.has(htmlFileName)) {
-                            return Promise.resolve(null); // Skip already processed files
+                            return Promise.resolve(null);
                         }
                         processedFiles.add(htmlFileName);
 
@@ -290,33 +297,36 @@
                                     });
 
                                     const formattedTitle = formatEpisodeTitle(htmlFileName);
-                                    const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}"><h3>${formattedTitle}</h3></a>`;
-                                    return { html: `${link}${contextHtml}`, date: result.ref }; // return result data
+                                    const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}" target="_blank"><h3>${formattedTitle}</h3></a>`;
+                                    return { html: `${link}${contextHtml}`, date: result.ref };
                                 }
-                                return null; // return null if no match found
+                                return null;
                             })
                             .catch(error => {
                                 console.error('Error loading HTML file:', error);
-                                return { html: `<div class="result">Error loading ${htmlFileName}</div>`, date: result.ref }; // return error message
+                                return { html: `<div class="result">Error loading ${htmlFileName}</div>`, date: result.ref };
                             });
                     });
                     Promise.all(fetchPromises).then(resultData => {
-                        const validResults = resultData.filter(result => result !== null); // filter out null results
+                        const validResults = resultData.filter(result => result !== null);
                         validResults.sort((a, b) => {
-                            const partsA = a.date.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
-                            const partsB = b.date.match(/O&A-(\d{4})-(\d{2})-(\d{2})\.html/);
+                            const partsA = a.date.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
+                            const partsB = b.date.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
 
                             if (partsA && partsB) {
                                 const yearA = parseInt(partsA[1]);
                                 const monthA = parseInt(partsA[2]);
                                 const dayA = parseInt(partsA[3]);
+                                const partA = partsA[4] || '';
                                 const yearB = parseInt(partsB[1]);
                                 const monthB = parseInt(partsB[2]);
                                 const dayB = parseInt(partsB[3]);
+                                const partB = partsB[4] || '';
 
                                 if (yearA !== yearB) return yearA - yearB;
                                 if (monthA !== monthB) return monthA - monthB;
-                                return dayA - dayB;
+                                if (dayA !== dayB) return dayA - dayB;
+                                return partA.localeCompare(partB);
                             }
                             return 0;
                         });
@@ -333,5 +343,5 @@
                 console.error('Error fetching or parsing search_index.json:', error);
             });
     </script>
-    </body>
-    </html>
+</body>
+</html>
