@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,13 +13,16 @@
             background-color: #020202;
             color: white;
         }
+
         #logo {
             width: 250px;
             height: 250px;
             margin: 20px auto;
             display: block;
         }
-        #searchInstructions, #scanningMessage {
+
+        #searchInstructions,
+        #scanningMessage {
             text-align: center;
             color: #FDD600;
             margin-bottom: 20px;
@@ -26,6 +30,7 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         #searchInstructions ul {
             list-style-type: disc;
             padding-left: 20px;
@@ -33,17 +38,21 @@
             margin: 10px auto;
             max-width: 600px;
         }
+
         #searchInstructions li {
             line-height: 1.6;
             margin-bottom: 10px;
             font-size: 1.1em;
             font-weight: normal;
         }
+
         #scanningMessage {
             font-size: 1.2em;
             font-style: italic;
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
         }
+
         #controls {
             display: flex;
             justify-content: center;
@@ -60,6 +69,7 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         #searchBox {
             padding: 8px;
             font-size: 16px;
@@ -71,7 +81,10 @@
             max-width: 400px;
             box-sizing: border-box;
         }
-        #searchButton, #prevMatch, #nextMatch {
+
+        #searchButton,
+        #prevMatch,
+        #nextMatch {
             padding: 8px 12px;
             font-size: 16px;
             border: 1px solid #ddd;
@@ -81,10 +94,12 @@
             color: black;
             box-sizing: border-box;
         }
+
         #matchCount {
             margin: 0 10px;
             box-sizing: border-box;
         }
+
         @media (max-width: 600px) {
             #searchBox {
                 max-width: 180px;
@@ -92,31 +107,40 @@
                 font-size: 14px;
                 flex-basis: 70%;
             }
-            #searchButton, #prevMatch, #nextMatch {
+
+            #searchButton,
+            #prevMatch,
+            #nextMatch {
                 padding: 6px 10px;
                 font-size: 14px;
             }
+
             #controls {
                 width: 100%;
                 margin: 0 auto;
                 padding: 0px;
             }
         }
+
         .highlight {
             background-color: orange;
             color: black;
         }
+
         #results a:link {
             color: #FDD600;
             text-decoration: none;
         }
+
         #results a:visited {
             color: orange;
             text-decoration: none;
         }
+
         #results p {
             color: white;
         }
+
         /* New Styles for Links */
         #topLinks {
             position: absolute;
@@ -124,23 +148,31 @@
             left: 10px;
             z-index: 1001;
         }
+
         #topLinks a {
             color: #FDD600;
             text-decoration: none;
             margin-right: 15px;
         }
+
         #topLinks a:hover {
             text-decoration: underline;
         }
+
         #results {
             margin-top: 20px;
-            max-width: 800px; /* Limit the width */
-            margin-left: auto; /* Center horizontally */
-            margin-right: auto; /* Center horizontally */
-            padding: 0 10px; /* Add some padding for visual spacing */
+            max-width: 800px;
+            /* Limit the width */
+            margin-left: auto;
+            /* Center horizontally */
+            margin-right: auto;
+            /* Center horizontally */
+            padding: 0 10px;
+            /* Add some padding for visual spacing */
         }
     </style>
 </head>
+
 <body>
     <div id="topLinks">
         <a href="http://podcasttranscripts.org">Home</a>
@@ -153,9 +185,12 @@
     </div>
     <div id="searchInstructions">
         <ul style="margin-top: 20px;">
-            <li>Shows from 1994-2014, but the record starts to become much more complete from 2001 onward. If you think something is missing, please check the About page and contact me.</li>
-            <li>Separate keywords/keyphrases with a "+" if you want to search for more than one. E.g. "Jim Norton + voyeur bus" would return all transcripts containing both of those phrases.</li>
-            <li>Be creative when searching proper nouns/made-up words. If "Jay Mohr" doesn't yield any results, try "J. Mohr", "J More", "Jay Moore", etc.</li>
+            <li>Shows from 1994-2014, but the record starts to become much more complete from 2001 onward. If you
+                think something is missing, please check the About page and contact me.</li>
+            <li>Separate keywords/keyphrases with a "+" if you want to search for more than one. E.g. "Jim Norton +
+                voyeur bus" would return all transcripts containing both of those phrases.</li>
+            <li>Be creative when searching proper nouns/made-up words. If "Jay Mohr" doesn't yield any results, try "J.
+                Mohr", "J More", "Jay Moore", etc.</li>
             <li>Click the episode date to open the full transcript.</li>
         </ul>
     </div>
@@ -172,7 +207,7 @@
                 const resultsDiv = document.getElementById('results');
 
                 document.getElementById('searchButton').addEventListener('click', performSearch);
-                document.getElementById('searchBox').addEventListener('keydown', function(event) {
+                document.getElementById('searchBox').addEventListener('keydown', function (event) {
                     if (event.key === 'Enter') {
                         performSearch();
                     }
@@ -188,7 +223,7 @@
                     setTimeout(() => {
                         displayResults(results, query);
                         scanningMessage.style.display = 'none'; // Hide scanning message after results
-                    }, 100); // Adjust the delay (in milliseconds) as needed
+                    }, 250); // Increased delay to 250ms for better visibility
                 }
 
                 function formatEpisodeTitle(fileName) {
@@ -198,7 +233,11 @@
                         const month = parseInt(parts[2]) - 1;
                         const day = parts[3];
                         const date = new Date(year, month, day);
-                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        const options = {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        };
                         return date.toLocaleDateString('en-US', options) + (parts[4] ? ` ${parts[4]}` : '');
                     }
                     return fileName;
@@ -265,14 +304,20 @@
                                         keywords.forEach(keyword => {
                                             let index = textContent.indexOf(keyword);
                                             while (index !== -1) {
-                                                allIndices.push({ index: index, keyword: keyword });
+                                                allIndices.push({
+                                                    index: index,
+                                                    keyword: keyword
+                                                });
                                                 index = textContent.indexOf(keyword, index + 1);
                                             }
                                         });
                                     } else {
                                         let index = textContent.indexOf(query);
                                         while (index !== -1) {
-                                            allIndices.push({ index: index, keyword: query });
+                                            allIndices.push({
+                                                index: index,
+                                                keyword: query
+                                            });
                                             index = textContent.indexOf(query, index + 1);
                                         }
                                     }
@@ -310,13 +355,19 @@
 
                                     const formattedTitle = formatEpisodeTitle(htmlFileName);
                                     const link = `<a href="transcript.html?file=${encodeURIComponent(htmlFileName)}" target="_blank"><h3>${formattedTitle}</h3></a>`;
-                                    return { html: `${link}${contextHtml}`, date: result.ref };
+                                    return {
+                                        html: `${link}${contextHtml}`,
+                                        date: result.ref
+                                    };
                                 }
                                 return null;
                             })
                             .catch(error => {
                                 console.error('Error loading HTML file:', error);
-                                return { html: `<div class="result">Error loading ${htmlFileName}</div>`, date: result.ref };
+                                return {
+                                    html: `<div class="result">Error loading ${htmlFileName}</div>`,
+                                    date: result.ref
+                                };
                             });
                     });
                     Promise.all(fetchPromises).then(resultData => {
@@ -356,4 +407,5 @@
             });
     </script>
 </body>
+
 </html>
