@@ -189,12 +189,43 @@
     <div id="results" style="margin-top: 20px;"></div>
     <script src="lunr.js"></script>
     <script>
+        // Helper function to format episode titles
+        function formatEpisodeTitle(fileName) {
+            const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
+            if (parts) {
+                const year = parts[1];
+                const month = parseInt(parts[2]) - 1;
+                const day = parts[3];
+                const date = new Date(year, month, day);
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                return date.toLocaleDateString('en-US', options) + (parts[4] ? ` ${parts[4]}` : '');
+            }
+            return fileName;
+        }
+
+        // Function to fetch and search through multiple parts of the index
+        async function fetchIndex() {
+            const indexFiles = [/* List your index JSON files here, e.g. 'index-part1.json', 'index-part2.json' */];
+            let searchIndex = [];
+
+            for (const file of indexFiles) {
+                const response = await fetch(file);
+                const data = await response.json();
+                searchIndex = searchIndex.concat(data);  // Combine multiple parts of the index
+            }
+
+            return searchIndex;
+        }
+
         fetch('search_index.json')
             .then(response => response.json())
             .then(data => {
                 const idx = lunr.Index.load(data);
                 const searchInstructions = document.getElementById('searchInstructions');
-                // REMOVED: const scanningMessage = document.getElementById('scanningMessage');
                 const resultsDiv = document.getElementById('results');
 
                 document.getElementById('searchButton').addEventListener('click', performSearch);
@@ -206,32 +237,12 @@
 
                 function performSearch() {
                     searchInstructions.style.display = 'none'; // Hide instructions
-                    // REMOVED: scanningMessage.style.display = 'block'; // Show scanning message
                     resultsDiv.innerHTML = ''; // Clear previous results
                     const query = document.getElementById('searchBox').value;
                     const results = idx.search(query);
-                    // Introduce a small delay to ensure the "Scanning transcripts..." message is visible
                     setTimeout(() => {
                         displayResults(results, query);
-                        // REMOVED: scanningMessage.style.display = 'none'; // Hide scanning message after results
                     }, 0); // Set delay to 0 to remove the pause
-                }
-
-                function formatEpisodeTitle(fileName) {
-                    const parts = fileName.match(/O&A-(\d{4})-(\d{2})-(\d{2})(?:-([PV]\d+))?\.html/);
-                    if (parts) {
-                        const year = parts[1];
-                        const month = parseInt(parts[2]) - 1;
-                        const day = parts[3];
-                        const date = new Date(year, month, day);
-                        const options = {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        };
-                        return date.toLocaleDateString('en-US', options) + (parts[4] ? ` ${parts[4]}` : '');
-                    }
-                    return fileName;
                 }
 
                 function displayResults(results, originalQuery) {
